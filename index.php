@@ -92,10 +92,10 @@ $settings['online_music'] = '';
                 
                        <div class="input-group">
                            <label for="online_music">배경음악 :</label>
-                           <div class="traffic-info" style="font-size: 12px; margin-bottom: 5px;">
-                               <div style="color: #4ecdc4;">✅ CDN 직접 연결 시도 (서버 트래픽 0MB)</div>
-                               <div style="color: #ff6b6b;">⚠️ 실패 시 프록시 사용 (서버 트래픽 2배 증가)</div>
-                           </div>
+        <div class="traffic-info" style="font-size: 12px; margin-bottom: 5px;">
+            <div style="color: #4ecdc4;">✅ CDN 직접 연결만 시도 (서버 트래픽 0MB)</div>
+            <div style="color: #ffa500;">⚠️ 실패 시 음악 없이 진행 (프록시 사용 안 함)</div>
+        </div>
                             <div class="music-select-container">
                                 <select id="online_music" name="online_music">
                                     <option value="">음악을 선택하세요</option>

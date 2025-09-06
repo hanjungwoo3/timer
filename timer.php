@@ -56,60 +56,48 @@ if (!$settings) {
     <?php 
     $music_url = isset($settings['online_music']) ? $settings['online_music'] : '';
     if (!empty($music_url)): 
-        // 직접 링크 시도 (CDN에서 바로 전송)
+        // CDN 직접 연결만 시도 (프록시 사용 안 함)
         $direct_url = $music_url;
-        $proxy_url = 'music_proxy.php?url=' . urlencode($music_url);
     ?>
         <audio id="backgroundMusic" loop preload="auto">
-            <!-- 첫 번째 시도: crossorigin 없이 -->
+            <!-- CDN 직접 연결만 시도 -->
             <source src="<?= htmlspecialchars($direct_url) ?>" type="audio/mpeg">
             브라우저가 오디오를 지원하지 않습니다.
         </audio>
         <script>
             console.log('원본 음악 URL:', <?= json_encode($music_url) ?>);
-            console.log('직접 링크 시도:', <?= json_encode($direct_url) ?>);
-            console.log('프록시 백업 URL:', <?= json_encode($proxy_url) ?>);
+            console.log('CDN 직접 연결만 시도 (프록시 사용 안 함)');
             
-            // 다단계 CORS 우회 시도
+            // CDN 직접 연결만 시도
             const backgroundMusic = document.getElementById('backgroundMusic');
             let attemptCount = 0;
-            const maxAttempts = 3;
+            const maxAttempts = 2; // 직접 연결 2회만 시도
             
             function tryDirectAccess() {
                 attemptCount++;
-                console.log(`직접 링크 시도 ${attemptCount}/${maxAttempts}`);
+                console.log(`CDN 직접 연결 시도 ${attemptCount}/${maxAttempts}`);
                 
                 if (backgroundMusic) {
-                    // 에러 발생 시 다음 방법 시도
+                    // 에러 발생 시 처리
                     backgroundMusic.addEventListener('error', function handleError() {
                         console.log(`시도 ${attemptCount} 실패`);
                         
                         if (attemptCount < maxAttempts) {
-                            // 다른 방법으로 재시도
+                            // 두 번째 시도: crossorigin 추가
                             this.removeEventListener('error', handleError);
-                            
-                            if (attemptCount === 2) {
-                                // 두 번째 시도: crossorigin 추가
-                                console.log('crossorigin 속성 추가하여 재시도');
-                                this.crossOrigin = 'anonymous';
-                            } else if (attemptCount === 3) {
-                                // 세 번째 시도: 프록시 사용
-                                console.log('프록시로 전환');
-                                this.src = <?= json_encode($proxy_url) ?>;
-                            }
+                            console.log('crossorigin 속성 추가하여 재시도');
+                            this.crossOrigin = 'anonymous';
                             this.load();
                         } else {
-                            console.error('모든 시도 실패');
+                            // 모든 시도 실패 - 음악 없이 진행
+                            console.log('🚫 CDN 직접 연결 실패 - 음악 없이 진행 (서버 트래픽 0MB)');
+                            this.remove(); // audio 요소 제거
                         }
                     });
                     
                     // 성공 시 로그
                     backgroundMusic.addEventListener('canplay', function() {
-                        if (attemptCount <= 2) {
-                            console.log('🎉 CDN 직접 연결 성공! 서버 트래픽 0MB');
-                        } else {
-                            console.log('⚠️ 프록시 연결 성공 (서버 트래픽 발생)');
-                        }
+                        console.log('🎉 CDN 직접 연결 성공! 서버 트래픽 0MB');
                     });
                     
                     backgroundMusic.addEventListener('loadstart', function() {

@@ -1,26 +1,12 @@
-# PHP 설정
-php_value upload_max_filesize 50M
-php_value post_max_size 50M
-php_value max_execution_time 300
-php_value max_input_time 300
-
 # 보안 설정
 Options -Indexes
-
-# MIME 타입 설정
-AddType audio/mpeg .mp3
-AddType audio/wav .wav
-AddType audio/ogg .ogg
-AddType audio/mp4 .m4a
 
 # 캐시 설정
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType audio/mpeg "access plus 1 week"
-    ExpiresByType audio/wav "access plus 1 week"
-    ExpiresByType audio/ogg "access plus 1 week"
+    ExpiresByType application/json "access plus 1 day"
 </IfModule>
 
 # Gzip 압축
