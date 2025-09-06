@@ -56,16 +56,70 @@ if (!$settings) {
     <?php 
     $music_url = isset($settings['online_music']) ? $settings['online_music'] : '';
     if (!empty($music_url)): 
-        // 프록시를 통해 음악 파일 제공
+        // 직접 링크 시도 (CDN에서 바로 전송)
+        $direct_url = $music_url;
         $proxy_url = 'music_proxy.php?url=' . urlencode($music_url);
     ?>
         <audio id="backgroundMusic" loop preload="auto">
-            <source src="<?= htmlspecialchars($proxy_url) ?>" type="audio/mpeg">
+            <!-- 첫 번째 시도: crossorigin 없이 -->
+            <source src="<?= htmlspecialchars($direct_url) ?>" type="audio/mpeg">
             브라우저가 오디오를 지원하지 않습니다.
         </audio>
         <script>
             console.log('원본 음악 URL:', <?= json_encode($music_url) ?>);
-            console.log('프록시 음악 URL:', <?= json_encode($proxy_url) ?>);
+            console.log('직접 링크 시도:', <?= json_encode($direct_url) ?>);
+            console.log('프록시 백업 URL:', <?= json_encode($proxy_url) ?>);
+            
+            // 다단계 CORS 우회 시도
+            const backgroundMusic = document.getElementById('backgroundMusic');
+            let attemptCount = 0;
+            const maxAttempts = 3;
+            
+            function tryDirectAccess() {
+                attemptCount++;
+                console.log(`직접 링크 시도 ${attemptCount}/${maxAttempts}`);
+                
+                if (backgroundMusic) {
+                    // 에러 발생 시 다음 방법 시도
+                    backgroundMusic.addEventListener('error', function handleError() {
+                        console.log(`시도 ${attemptCount} 실패`);
+                        
+                        if (attemptCount < maxAttempts) {
+                            // 다른 방법으로 재시도
+                            this.removeEventListener('error', handleError);
+                            
+                            if (attemptCount === 2) {
+                                // 두 번째 시도: crossorigin 추가
+                                console.log('crossorigin 속성 추가하여 재시도');
+                                this.crossOrigin = 'anonymous';
+                            } else if (attemptCount === 3) {
+                                // 세 번째 시도: 프록시 사용
+                                console.log('프록시로 전환');
+                                this.src = <?= json_encode($proxy_url) ?>;
+                            }
+                            this.load();
+                        } else {
+                            console.error('모든 시도 실패');
+                        }
+                    });
+                    
+                    // 성공 시 로그
+                    backgroundMusic.addEventListener('canplay', function() {
+                        if (attemptCount <= 2) {
+                            console.log('🎉 CDN 직접 연결 성공! 서버 트래픽 0MB');
+                        } else {
+                            console.log('⚠️ 프록시 연결 성공 (서버 트래픽 발생)');
+                        }
+                    });
+                    
+                    backgroundMusic.addEventListener('loadstart', function() {
+                        console.log('음악 로드 시작:', this.src);
+                    });
+                }
+            }
+            
+            // 첫 번째 시도 시작
+            tryDirectAccess();
             
             // 음악 정보 표시
             const musicInfo = document.getElementById('musicInfo');
@@ -117,7 +171,7 @@ if (!$settings) {
         const stopBtn = document.getElementById('stopBtn');
         const endMessage = document.getElementById('endMessage');
         const progressRing = document.querySelector('.progress-ring-circle');
-        const backgroundMusic = document.getElementById('backgroundMusic');
+        // backgroundMusic은 위에서 이미 선언됨
         
         // 진행바 설정
         const radius = progressRing.r.baseVal.value;
