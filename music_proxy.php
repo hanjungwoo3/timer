@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-$url = $_GET['url'] ?? '';
+$url = isset($_GET['url']) ? $_GET['url'] : '';
 
 if (empty($url)) {
     http_response_code(400);
@@ -58,7 +58,7 @@ if ($httpCode !== 200) {
 
 // 응답 헤더 설정
 $body = substr($response, $headerSize);
-header('Content-Type: ' . ($contentType ?: 'audio/mpeg'));
+header('Content-Type: ' . ($contentType ? $contentType : 'audio/mpeg'));
 header('Content-Length: ' . strlen($body));
 header('Accept-Ranges: bytes');
 header('Cache-Control: public, max-age=3600');

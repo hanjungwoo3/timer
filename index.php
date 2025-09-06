@@ -33,9 +33,9 @@ session_start();
 
 if (file_exists('timer_settings.json')) {
     $json_settings = json_decode(file_get_contents('timer_settings.json'), true);
-    $settings = $json_settings ?: $default_settings;
+    $settings = $json_settings ? $json_settings : $default_settings;
 } else {
-    $settings = $_SESSION['timer_settings'] ?? $default_settings;
+    $settings = isset($_SESSION['timer_settings']) ? $_SESSION['timer_settings'] : $default_settings;
 }
 
 // 설정 페이지에서는 음악 설정을 항상 빈 값으로 시작 (랜덤 선택을 위해)
@@ -66,7 +66,7 @@ $settings['online_music'] = '';
                             <div class="time-select-container">
                                 <select id="minutes" name="minutes">
                                     <?php
-                                    $selected_minutes = $settings['minutes'] ?? 5;
+                                    $selected_minutes = isset($settings['minutes']) ? $settings['minutes'] : 5;
                                     for ($i = 0; $i <= 10; $i++) {
                                         $selected = ($selected_minutes == $i) ? 'selected' : '';
                                         echo "<option value=\"$i\" $selected>{$i}분</option>";
@@ -75,7 +75,7 @@ $settings['online_music'] = '';
                                 </select>
                                 <select id="seconds" name="seconds">
                                     <?php
-                                    $selected_seconds = $settings['seconds'] ?? 0;
+                                    $selected_seconds = isset($settings['seconds']) ? $settings['seconds'] : 0;
                                     for ($i = 0; $i <= 55; $i += 5) {
                                         $selected = ($selected_seconds == $i) ? 'selected' : '';
                                         echo "<option value=\"$i\" $selected>{$i}초</option>";
@@ -98,7 +98,7 @@ $settings['online_music'] = '';
                                     <?php
                                     if (file_exists('music_list.json')) {
                                         $music_list = json_decode(file_get_contents('music_list.json'), true);
-                                        $selected_music = $settings['online_music'] ?? '';
+                                        $selected_music = isset($settings['online_music']) ? $settings['online_music'] : '';
                                         
                                                                 // PHP에서는 랜덤 선택하지 않음 (JavaScript에서 처리)
                                         
