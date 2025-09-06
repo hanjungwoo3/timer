@@ -213,16 +213,16 @@ $settings['online_music'] = '';
                 // 선택된 음악 정보 출력
                 console.log('랜덤 음악 선택:', randomOption.textContent);
                 
-                // 음악 테스트
+                // 음악 테스트 (CDN 직접 연결만 시도)
                 const selectedOption = randomOption;
                 if (selectedOption && selectedOption.value) {
-                    const proxyUrl = 'music_proxy.php?url=' + encodeURIComponent(selectedOption.value);
+                    const directUrl = selectedOption.value;
                     const testAudio = new Audio();
-                    testAudio.addEventListener('loadstart', () => { console.log('랜덤 음악 URL 테스트: 로드 시작'); });
-                    testAudio.addEventListener('error', (e) => { console.error('랜덤 음악 URL 테스트 실패:', e); });
-                    testAudio.addEventListener('canplay', () => { console.log('랜덤 음악 URL 테스트: 재생 가능'); });
-                    console.log('랜덤 선택 프록시 테스트 URL:', proxyUrl);
-                    testAudio.src = proxyUrl;
+                    testAudio.addEventListener('loadstart', () => { console.log('랜덤 음악 CDN 직접 테스트: 로드 시작'); });
+                    testAudio.addEventListener('error', (e) => { console.log('랜덤 음악 CDN 직접 테스트 실패 (정상 - 프록시 사용 안 함)'); });
+                    testAudio.addEventListener('canplay', () => { console.log('랜덤 음악 CDN 직접 테스트: 재생 가능'); });
+                    console.log('랜덤 선택 CDN 직접 테스트 URL:', directUrl);
+                    testAudio.src = directUrl;
                 }
                 
                 return true; // 성공
