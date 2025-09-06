@@ -35,7 +35,7 @@ if (!$settings) {
                         <circle class="progress-ring-circle" cx="200" cy="200" r="190" />
                     </svg>
                            <div class="timer-display" id="timerDisplay">
-                               <?= sprintf('%02d:%02d', $settings['minutes'], $settings['seconds'] ?? 0) ?>
+                               <?= sprintf('%02d:%02d', $settings['minutes'], isset($settings['seconds']) ? $settings['seconds'] : 0) ?>
                            </div>
                     <div class="music-info" id="musicInfo"></div>
                 </div>
@@ -54,7 +54,7 @@ if (!$settings) {
     </div>
     
     <?php 
-    $music_url = $settings['online_music'] ?? '';
+    $music_url = isset($settings['online_music']) ? $settings['online_music'] : '';
     if (!empty($music_url)): 
         // 프록시를 통해 음악 파일 제공
         $proxy_url = 'music_proxy.php?url=' . urlencode($music_url);
@@ -101,7 +101,7 @@ if (!$settings) {
     
         <script>
             // 타이머 설정
-            const TOTAL_SECONDS = <?= ($settings['minutes'] * 60) + ($settings['seconds'] ?? 0) ?>;
+            const TOTAL_SECONDS = <?= ($settings['minutes'] * 60) + (isset($settings['seconds']) ? $settings['seconds'] : 0) ?>;
             const END_MESSAGE = <?= json_encode($settings['end_message']) ?>;
         
         let remainingSeconds = TOTAL_SECONDS;

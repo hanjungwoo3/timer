@@ -3,13 +3,13 @@ session_start();
 
         // 타이머 시작 시 설정 저장 처리
         if ($_POST && isset($_POST['start_timer'])) {
-            $settings = [
-                'title' => $_POST['title'] ?? '타이머',
-                'minutes' => (int)($_POST['minutes'] ?? 5),
-                'seconds' => (int)($_POST['seconds'] ?? 0),
-                'end_message' => $_POST['end_message'] ?? '완료!',
-                'online_music' => $_POST['online_music'] ?? ''
-            ];
+            $settings = array(
+                'title' => isset($_POST['title']) ? $_POST['title'] : '타이머',
+                'minutes' => (int)(isset($_POST['minutes']) ? $_POST['minutes'] : 5),
+                'seconds' => (int)(isset($_POST['seconds']) ? $_POST['seconds'] : 0),
+                'end_message' => isset($_POST['end_message']) ? $_POST['end_message'] : '완료!',
+                'online_music' => isset($_POST['online_music']) ? $_POST['online_music'] : ''
+            );
     
     // JSON 파일로 저장 (모든 설정 포함)
     file_put_contents('timer_settings.json', json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -23,13 +23,13 @@ session_start();
 }
 
         // 저장된 설정 불러오기 (JSON 파일 우선, 없으면 기본값)
-        $default_settings = [
+        $default_settings = array(
             'title' => '타이머',
             'minutes' => 5,
             'seconds' => 0,
             'end_message' => '완료!',
             'online_music' => ''
-        ];
+        );
 
 if (file_exists('timer_settings.json')) {
     $json_settings = json_decode(file_get_contents('timer_settings.json'), true);
