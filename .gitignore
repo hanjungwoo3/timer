@@ -1,0 +1,27 @@
+# 사용자 설정 파일 (각 환경마다 다름)
+timer_settings.json
+
+# 로그 파일
+*.log
+
+# 캐시 디렉토리 (향후 추가될 수 있음)
+cache/
+
+# 임시 파일
+*.tmp
+*.temp
+
+# macOS 파일
+.DS_Store
+
+# Windows 파일
+Thumbs.db
+
+# IDE 파일
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PHP 임시 파일
+*.php~
