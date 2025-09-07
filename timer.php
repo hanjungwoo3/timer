@@ -319,6 +319,12 @@ if (!$settings) {
             // 컨트롤 버튼들 숨기기
             document.querySelector('.timer-controls').style.display = 'none';
             
+            // 제목 표시 유지 (종료 화면에서도 제목이 보이도록)
+            const timerTitle = document.querySelector('.timer-title');
+            if (timerTitle) {
+                timerTitle.style.display = 'block';
+            }
+            
             // 종료 메시지 표시
             endMessage.style.display = 'block';
             
@@ -492,10 +498,10 @@ if (!$settings) {
             
             // CSS에서 기본적으로 숨겨져 있으므로 별도 숨김 처리 불필요
             
-            // 제목만 표시 (원래 전체화면 크기와 동일)
+            // 제목만 표시 (큰 크기로 표시)
             const timerTitle = document.querySelector('.timer-title');
             timerTitle.style.display = 'block';
-            timerTitle.style.fontSize = 'clamp(20px, 4vw, 48px)'; // 원래 크기 유지
+            timerTitle.style.fontSize = 'clamp(20px, 4.5vw, 54px)'; // 더 줄인 크기로 설정
             
             // 진행바 구분선 미리 생성 (준비 상태에서도 보이도록)
             createProgressTicks();

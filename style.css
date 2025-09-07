@@ -217,6 +217,13 @@ kbd {
     align-items: center;
     min-height: 100vh;
     padding: 20px;
+    position: fixed; /* 고정 위치로 크기 변화 방지 */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
 }
 
 .timer-content {
@@ -226,24 +233,27 @@ kbd {
     gap: 30px;
     width: 100%;
     max-width: 800px;
+    position: relative; /* 상대 위치로 안정성 확보 */
 }
 
 .timer-title {
-    font-size: clamp(20px, 4vw, 48px); /* 폰트 크기를 더 크게 */
+    font-size: clamp(20px, 4.5vw, 54px); /* 폰트 크기를 더 줄임 */
     font-weight: bold;
     color: #ffffff;
     text-align: center; /* 가운데 정렬 */
     margin-bottom: 20px;
-    width: 100%; /* 전체 너비 사용 */
+    width: 90vw; /* 뷰포트 기준 너비로 고정 */
+    max-width: 800px; /* 최대 너비 제한 */
     box-sizing: border-box; /* 패딩/마진 포함한 크기 계산 */
-    align-self: stretch; /* 부모의 align-items 무시하고 전체 너비 사용 */
-    white-space: normal; /* 줄바꿈 허용 */
+    white-space: normal; /* 일반적인 인라인 줄바꿈 처리 */
     overflow: visible; /* 넘치는 텍스트 표시 */
     word-wrap: break-word; /* 긴 단어 줄바꿈 */
-    line-height: 1.3; /* 줄 간격을 약간 늘려서 가독성 향상 */
     padding: 10px 20px; /* 좌우 패딩 추가로 여유 공간 확보 */
     background-color: transparent; /* 디버깅 배경 제거 */
     display: block; /* 블록 요소로 명시적 설정 */
+    position: relative; /* 상대 위치로 안정성 확보 */
+    margin-left: auto;
+    margin-right: auto; /* 중앙 정렬 */
 }
 
 /* 원형 진행바 컨테이너 */
@@ -259,8 +269,8 @@ kbd {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: clamp(350px, 60vmin, 700px); /* 원 크기 증가 */
-    height: clamp(350px, 60vmin, 700px);
+    width: clamp(320px, 50vmin, 550px); /* 원 크기 조금 증가 */
+    height: clamp(320px, 50vmin, 550px);
 }
 
 .progress-ring {
@@ -299,7 +309,7 @@ kbd {
     top: 45%; /* 음악 정보를 위해 약간 위로 이동 */
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: clamp(40px, 8vw, 80px); /* 폰트 크기 줄임 */
+    font-size: clamp(36px, 7vw, 72px); /* 타이머 폰트 크기 조금 증가 */
     font-weight: bold;
     color: #ffffff;
     font-family: 'Courier New', monospace;
