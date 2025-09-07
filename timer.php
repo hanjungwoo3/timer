@@ -168,53 +168,44 @@ if (!$settings) {
         progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
         progressRing.style.strokeDashoffset = 0; // 초기값을 0으로 설정 (100% 상태)
         
-        // 진행바 구분선 생성 함수
+        // 진행바 구분선 생성 함수 (시계 스타일)
         function createProgressTicks() {
             const ticksContainer = document.querySelector('.progress-ring-ticks');
-            const totalSeconds = <?= $settings['minutes'] * 60 + (isset($settings['seconds']) ? $settings['seconds'] : 0) ?>;
             const radius = 160;
             
             // 기존 구분선 제거
             ticksContainer.innerHTML = '';
             
-            // 1초 단위로 구분선 생성 (최대 300초까지만)
-            if (totalSeconds <= 300) {
-                const tickInterval = 1; // 1초 간격
+            // 시계처럼 84개 틱 생성 (12개 큰 틱 + 72개 작은 틱)
+            // 12개 큰 틱 사이에 각각 6개씩 작은 틱 = 12 + (12 × 6) = 84개
+            for (let i = 0; i < 84; i++) {
+                const angle = -90 + (i * (360 / 84)); // 약 4.29도씩
+                const radian = (angle * Math.PI) / 180;
                 
-                // 0초부터 totalSeconds까지 틱 생성 (시작점 포함)
-                for (let i = 0; i <= totalSeconds; i += tickInterval) {
-                    // 진행바와 정확히 같은 방식으로 각도 계산
-                    const remainingAtTick = totalSeconds - i;
-                    const tickPercent = (remainingAtTick / totalSeconds) * 100;
-                    // 진행바와 동일한 각도 계산: 12시 방향에서 시계방향으로
-                    const angle = -90 + (tickPercent / 100) * 360;
-                    const radian = (angle * Math.PI) / 180;
-                    
-                    // 0초(시작점)와 5초 단위는 긴 구분선, 1초 단위는 짧은 구분선
-                    const isMainTick = (i === 0 || i % 5 === 0);
-                    const tickLength = isMainTick ? 12 : 6;
-                    const tickWidth = isMainTick ? 1.5 : 1;
-                    const tickOpacity = isMainTick ? 0.4 : 0.25;
-                    
-                    // 구분선 시작점 (바깥쪽)
-                    const x1 = 200 + (radius + tickLength) * Math.cos(radian);
-                    const y1 = 200 + (radius + tickLength) * Math.sin(radian);
-                    
-                    // 구분선 끝점 (안쪽)
-                    const x2 = 200 + (radius - tickLength) * Math.cos(radian);
-                    const y2 = 200 + (radius - tickLength) * Math.sin(radian);
-                    
-                    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    tick.setAttribute('x1', x1);
-                    tick.setAttribute('y1', y1);
-                    tick.setAttribute('x2', x2);
-                    tick.setAttribute('y2', y2);
-                    tick.setAttribute('stroke', '#555555');
-                    tick.setAttribute('stroke-width', tickWidth);
-                    tick.setAttribute('opacity', tickOpacity);
-                    
-                    ticksContainer.appendChild(tick);
-                }
+                // 7의 배수는 큰 틱 (0, 7, 14, 21... = 12개), 나머지는 작은 틱
+                const isMainTick = (i % 7 === 0);
+                const tickLength = isMainTick ? 15 : 8;
+                const tickWidth = isMainTick ? 1.3 : 1.2;
+                const tickOpacity = isMainTick ? 0.4 : 0.25;
+                
+                // 구분선 시작점 (바깥쪽)
+                const x1 = 200 + (radius + tickLength) * Math.cos(radian);
+                const y1 = 200 + (radius + tickLength) * Math.sin(radian);
+                
+                // 구분선 끝점 (안쪽)
+                const x2 = 200 + (radius - tickLength) * Math.cos(radian);
+                const y2 = 200 + (radius - tickLength) * Math.sin(radian);
+                
+                const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                tick.setAttribute('x1', x1);
+                tick.setAttribute('y1', y1);
+                tick.setAttribute('x2', x2);
+                tick.setAttribute('y2', y2);
+                tick.setAttribute('stroke', '#555555');
+                tick.setAttribute('stroke-width', tickWidth);
+                tick.setAttribute('opacity', tickOpacity);
+                
+                ticksContainer.appendChild(tick);
             }
         }
 
