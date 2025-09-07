@@ -207,19 +207,13 @@ if (!$settings) {
             timerDisplay.style.transform = 'translate(-50%, -50%) scale(1.15)'; // 1.03에서 1.15로 증가
             timerDisplay.style.fontWeight = '900';
             timerDisplay.style.opacity = '1';
-            timerDisplay.style.transition = 'transform 0.1s ease-out, opacity 0.3s ease-out, color 0.1s ease-out';
-            
-            // 마지막 30초일 때는 어두운 회색, 아니면 회색
-            const animationColor = (remainingSeconds <= 30 && remainingSeconds > 0) ? '#606060' : '#808080';
-            timerDisplay.style.color = animationColor;
+            timerDisplay.style.transition = 'transform 0.1s ease-out, opacity 0.3s ease-out';
             
             // 페이드 아웃 효과와 함께 원래 크기로 복원
             setTimeout(() => {
                 timerDisplay.style.transform = 'translate(-50%, -50%) scale(1)';
                 timerDisplay.style.fontWeight = 'bold';
                 timerDisplay.style.opacity = '0.8'; // 페이드 아웃 효과
-                // 30초 이하면 어두운 회색, 아니면 회색으로 복원
-                timerDisplay.style.color = (remainingSeconds <= 30 && remainingSeconds > 0) ? '#606060' : '#808080';
             }, 100);
             
             // 완전히 원래 상태로 복원
