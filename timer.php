@@ -335,6 +335,65 @@ if (!$settings) {
         
         // 함수들을 먼저 정의
         
+        // 현재 시간 표시 관련 변수
+        let currentTimeInterval = null;
+        
+        // 현재 시간 표시 요소 생성
+        function createCurrentTimeDisplay() {
+            // 기존 현재 시간 요소가 있으면 제거
+            const existingTimeDisplay = document.getElementById('currentTimeDisplay');
+            if (existingTimeDisplay) {
+                existingTimeDisplay.remove();
+            }
+            
+            // 현재 시간 표시 요소 생성
+            const currentTimeDisplay = document.createElement('div');
+            currentTimeDisplay.id = 'currentTimeDisplay';
+            currentTimeDisplay.style.cssText = `
+                position: fixed;
+                top: 70vh;
+                left: 50%;
+                transform: translateX(-50%);
+                color: #2a2a2a;
+                font-size: clamp(12px, 1.8vw, 24px);
+                font-weight: normal;
+                text-align: center;
+                z-index: 999;
+                font-family: 'Courier New', monospace;
+            `;
+            
+            document.body.appendChild(currentTimeDisplay);
+            
+            // 현재 시간 업데이트 시작
+            updateCurrentTime();
+            currentTimeInterval = setInterval(updateCurrentTime, 1000);
+        }
+        
+        // 현재 시간 업데이트
+        function updateCurrentTime() {
+            const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+            if (currentTimeDisplay) {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                currentTimeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+            }
+        }
+        
+        // 현재 시간 표시 제거
+        function removeCurrentTimeDisplay() {
+            const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+            if (currentTimeDisplay) {
+                currentTimeDisplay.remove();
+            }
+            
+            if (currentTimeInterval) {
+                clearInterval(currentTimeInterval);
+                currentTimeInterval = null;
+            }
+        }
+        
         // 음악 페이드 아웃 함수
         function fadeOutMusic(audioElement, duration = 2000) {
             if (!audioElement || audioElement.paused) return;
@@ -409,7 +468,10 @@ if (!$settings) {
             timerTitle.style.display = 'block';
             timerTitle.style.fontSize = 'clamp(20px, 4vw, 48px)'; // 원래 크기 유지
             
-            console.log('준비 상태: 제목만 표시 (타이머 요소들은 CSS에서 기본 숨김)');
+            // 현재 시간 표시 요소 생성
+            createCurrentTimeDisplay();
+            
+            console.log('준비 상태: 제목과 현재 시간 표시');
         }
         
         // 타이머 시작 (준비 상태에서 실행 상태로)
@@ -421,6 +483,9 @@ if (!$settings) {
             isRunning = true;
             
             // 준비 메시지 제거 (이제 메시지가 없으므로 불필요)
+            
+            // 현재 시간 표시 제거
+            removeCurrentTimeDisplay();
             
             // 타이머 디스플레이 컨테이너 표시
             const timerDisplayContainer = document.querySelector('.timer-display-container');
