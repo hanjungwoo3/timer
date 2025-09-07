@@ -272,13 +272,13 @@ kbd {
 .progress-ring-background {
     fill: transparent;
     stroke: #333333;
-    stroke-width: 15; /* 진행바 두께 줄임 */
+    stroke-width: 60; /* 진행바 두께 4배 증가 (30 → 60) */
 }
 
 .progress-ring-circle {
     fill: transparent;
-    stroke: #00ffff;
-    stroke-width: 15; /* 진행바 두께 줄임 */
+    stroke: #808080; /* 기본 색상을 회색으로 변경 */
+    stroke-width: 60; /* 진행바 두께 4배 증가 (30 → 60) */
     stroke-linecap: butt;
     transition: stroke-dashoffset 0.5s ease-in-out, stroke 0.3s ease;
 }
@@ -625,4 +625,22 @@ select option {
     color: #ccc;
     font-size: 14px;
     font-style: italic;
+}
+
+/* 종료 메시지 스타일 */
+.end-message {
+    position: fixed;
+    top: 60vh;
+    left: 0; /* 전체 너비 기준으로 시작 */
+    right: 0; /* 전체 너비 기준으로 끝 */
+    width: 100vw; /* 전체 뷰포트 너비 사용 */
+    margin: 0; /* 모든 마진 제거 */
+    padding: 0 20px; /* 좌우 여백만 추가 */
+    color: #888888; /* 회색 */
+    font-size: clamp(24px, 4vw, 48px);
+    font-weight: bold;
+    text-align: center; /* 텍스트 중앙 정렬 */
+    z-index: 1000;
+    white-space: pre-line;
+    transform: translateY(-50%); /* 세로 중앙 정렬만 유지 */
 }

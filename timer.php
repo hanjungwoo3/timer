@@ -31,8 +31,8 @@ if (!$settings) {
             <div class="timer-display-container">
                 <div class="circular-progress">
                     <svg class="progress-ring" viewBox="0 0 400 400">
-                        <circle class="progress-ring-background" cx="200" cy="200" r="190" />
-                        <circle class="progress-ring-circle" cx="200" cy="200" r="190" />
+                        <circle class="progress-ring-background" cx="200" cy="200" r="160" />
+                        <circle class="progress-ring-circle" cx="200" cy="200" r="160" />
                     </svg>
                            <div class="timer-display" id="timerDisplay">
                                <?= sprintf('%02d:%02d', $settings['minutes'], isset($settings['seconds']) ? $settings['seconds'] : 0) ?>
@@ -176,9 +176,11 @@ if (!$settings) {
             
             // 마지막 10초일 때 색상 변경
             if (remainingSeconds <= 10 && remainingSeconds > 0) {
-                progressRing.style.stroke = '#ff8c00'; // 형광 오렌지
+                progressRing.style.stroke = '#606060'; // 진행바 어두운 회색
+                timerDisplay.style.color = '#606060'; // 타이머 숫자도 어두운 회색
             } else {
-                progressRing.style.stroke = '#00ffff'; // 시안
+                progressRing.style.stroke = '#808080'; // 진행바 회색
+                timerDisplay.style.color = '#808080'; // 타이머 숫자도 회색
             }
         }
         
@@ -199,20 +201,32 @@ if (!$settings) {
             }
         }
         
-        // 깜빡임 애니메이션 (크기를 더 작게 조정)
+        // 깜빡임 애니메이션 (크기 증가 + 페이드 아웃 효과)
         function startBlinkAnimation() {
-            timerDisplay.style.transform = 'translate(-50%, -50%) scale(1.03)'; // translate 유지하면서 scale
+            // 애니메이션 시작: 크게 확대 + 불투명도 증가
+            timerDisplay.style.transform = 'translate(-50%, -50%) scale(1.15)'; // 1.03에서 1.15로 증가
             timerDisplay.style.fontWeight = '900';
+            timerDisplay.style.opacity = '1';
+            timerDisplay.style.transition = 'transform 0.1s ease-out, opacity 0.3s ease-out, color 0.1s ease-out';
             
-            // 마지막 10초일 때는 주황색, 아니면 시안색
-            const animationColor = (remainingSeconds <= 10 && remainingSeconds > 0) ? '#ff8c00' : '#00ffff';
+            // 마지막 10초일 때는 어두운 회색, 아니면 회색
+            const animationColor = (remainingSeconds <= 10 && remainingSeconds > 0) ? '#606060' : '#808080';
             timerDisplay.style.color = animationColor;
             
+            // 페이드 아웃 효과와 함께 원래 크기로 복원
             setTimeout(() => {
                 timerDisplay.style.transform = 'translate(-50%, -50%) scale(1)';
                 timerDisplay.style.fontWeight = 'bold';
-                timerDisplay.style.color = '#ffffff'; // 원래 흰색으로 복원
-            }, 200);
+                timerDisplay.style.opacity = '0.8'; // 페이드 아웃 효과
+                // 10초 이하면 어두운 회색, 아니면 회색으로 복원
+                timerDisplay.style.color = (remainingSeconds <= 10 && remainingSeconds > 0) ? '#606060' : '#808080';
+            }, 100);
+            
+            // 완전히 원래 상태로 복원
+            setTimeout(() => {
+                timerDisplay.style.opacity = '1';
+                timerDisplay.style.transition = 'none'; // 트랜지션 제거
+            }, 400);
         }
         
         // 전체화면 해제 함수
@@ -251,8 +265,12 @@ if (!$settings) {
                     remainingSeconds--;
                     updateDisplay();
                     
+                    // 0초가 되면 1초 후에 종료 (0초를 1초간 표시)
                     if (remainingSeconds <= 0) {
-                        timerFinished();
+                        setTimeout(() => {
+                            timerFinished();
+                        }, 1000);
+                        clearInterval(timerInterval); // 타이머 중지
                     }
                 }
             }, 1000);
@@ -264,9 +282,9 @@ if (!$settings) {
             clearInterval(timerInterval);
             isRunning = false;
             
-            // 음악 정지
-            if (backgroundMusic) {
-                backgroundMusic.pause();
+            // 음악 페이드 아웃 효과
+            if (backgroundMusic && !backgroundMusic.paused) {
+                fadeOutMusic(backgroundMusic, 2000); // 2초에 걸쳐 페이드 아웃
             }
             
             // 진행바 숨기기
@@ -281,22 +299,7 @@ if (!$settings) {
             // 종료 메시지 표시 후 전체화면 상태 유지
             console.log('타이머 완료 - 종료 메시지 표시 중, 전체화면 유지');
             
-            // 종료 후에도 ESC 키로 설정 페이지로 이동 가능하도록 안내 추가
-            setTimeout(() => {
-                const instructionDiv = document.createElement('div');
-                instructionDiv.style.cssText = `
-                    position: fixed;
-                    bottom: 50px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    color: #888888;
-                    font-size: 18px;
-                    text-align: center;
-                    z-index: 1000;
-                `;
-                instructionDiv.innerHTML = 'ESC 키를 눌러 설정 페이지로 돌아가기';
-                document.body.appendChild(instructionDiv);
-            }, 2000);
+            // 안내 메시지 제거 (사용자 요청)
         }
         
         // 일시정지/재생 토글
@@ -318,8 +321,9 @@ if (!$settings) {
             clearInterval(timerInterval);
             isRunning = false;
             
-            if (backgroundMusic) {
-                backgroundMusic.pause();
+            // 음악 페이드 아웃 효과 (빠른 페이드 아웃)
+            if (backgroundMusic && !backgroundMusic.paused) {
+                fadeOutMusic(backgroundMusic, 1000); // 1초에 걸쳐 페이드 아웃
             }
             
             // 전체화면 해제 후 설정 페이지로 이동
@@ -329,49 +333,160 @@ if (!$settings) {
             }, 300);
         }
         
-        // 이벤트 리스너
-        fullscreenBtn.addEventListener('click', toggleFullscreen);
-        pauseBtn.addEventListener('click', togglePause);
-        stopBtn.addEventListener('click', stopTimer);
+        // 함수들을 먼저 정의
         
-        // 키보드 단축키
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                // 타이머가 완료된 상태인지 확인
-                if (!isRunning && endMessage.style.display === 'block') {
-                    // 타이머 완료 후 ESC: 설정 페이지로 이동
-                    exitFullscreen();
-                    setTimeout(() => {
-                        window.location.href = 'index.php';
-                    }, 300);
+        // 음악 페이드 아웃 함수
+        function fadeOutMusic(audioElement, duration = 2000) {
+            if (!audioElement || audioElement.paused) return;
+            
+            const originalVolume = audioElement.volume;
+            const fadeStep = originalVolume / (duration / 50); // 50ms마다 볼륨 감소
+            
+            const fadeInterval = setInterval(() => {
+                if (audioElement.volume > fadeStep) {
+                    audioElement.volume -= fadeStep;
                 } else {
-                    // 타이머 실행 중 ESC: 일반 정지
-                    stopTimer();
+                    audioElement.volume = 0;
+                    audioElement.pause();
+                    audioElement.volume = originalVolume; // 원래 볼륨으로 복원 (다음 재생을 위해)
+                    clearInterval(fadeInterval);
+                    console.log('음악 페이드 아웃 완료');
                 }
-            } else if (e.key === ' ') {
-                e.preventDefault();
-                // 전체화면이 아니면 전체화면 전환, 전체화면이면 일시정지/재생
-                if (!document.fullscreenElement && 
-                    !document.webkitFullscreenElement && 
-                    !document.mozFullScreenElement && 
-                    !document.msFullscreenElement) {
-                    toggleFullscreen();
+            }, 50);
+            
+            console.log(`음악 페이드 아웃 시작 (${duration}ms)`);
+        }
+        
+        // 전체화면 토글 함수
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && 
+                !document.webkitFullscreenElement && 
+                !document.mozFullScreenElement && 
+                !document.msFullscreenElement) {
+                // 전체화면 진입
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(e => {
+                        console.log('전체화면 모드를 지원하지 않습니다:', e);
+                        alert('전체화면 모드가 지원되지 않습니다. F11 키를 눌러보세요.');
+                    });
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
                 } else {
-                    togglePause();
+                    alert('전체화면 모드가 지원되지 않습니다. F11 키를 눌러보세요.');
                 }
-            } else if (e.key === 'F11') {
-                e.preventDefault();
-                toggleFullscreen();
+            } else {
+                // 전체화면 해제
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
             }
-        });
+        }
         
-        // 초기화 및 시작
-        updateDisplay(); // 초기 디스플레이 설정
-        startTimer();    // 타이머 시작
+        // 타이머 상태 관리
+        let isReady = false; // 준비 상태
+        let isFullscreenReady = false; // 전체화면 준비 상태
         
-        // 음악 재생 시작
+        // 준비 상태 표시
+        function showReadyState() {
+            isReady = true;
+            isFullscreenReady = false;
+            isRunning = false;
+            
+            // 타이머 디스플레이 컨테이너 전체 숨기기
+            const timerDisplayContainer = document.querySelector('.timer-display-container');
+            if (timerDisplayContainer) {
+                timerDisplayContainer.style.display = 'none';
+            }
+            
+            // 버튼들 숨기기
+            const timerControls = document.querySelector('.timer-controls');
+            if (timerControls) {
+                timerControls.style.display = 'none';
+            }
+            
+            // 진행바 완전히 숨기기 (처음부터 보이지 않도록)
+            const progressRing = document.querySelector('.progress-ring-circle');
+            if (progressRing) {
+                progressRing.style.visibility = 'hidden';
+                progressRing.style.opacity = '0';
+            }
+            
+            // 제목만 표시 (원래 전체화면 크기와 동일)
+            const timerTitle = document.querySelector('.timer-title');
+            timerTitle.style.display = 'block';
+            timerTitle.style.fontSize = 'clamp(20px, 4vw, 48px)'; // 원래 크기 유지
+            
+            // 안내 메시지 제거 (사용자 요청)
+            
+            console.log('준비 상태: 제목만 표시, 진행바 숨김');
+        }
+        
+        // 타이머 시작 (준비 상태에서 실행 상태로)
+        function startTimerFromReady() {
+            if (!isReady) return;
+            
+            isReady = false;
+            isFullscreenReady = false;
+            isRunning = true;
+            
+            // 준비 메시지 제거 (이제 메시지가 없으므로 불필요)
+            
+            // 타이머 디스플레이 컨테이너 표시
+            const timerDisplayContainer = document.querySelector('.timer-display-container');
+            if (timerDisplayContainer) {
+                timerDisplayContainer.style.display = 'block';
+            }
+            
+            // 진행바 다시 보이기
+            const progressRing = document.querySelector('.progress-ring-circle');
+            if (progressRing) {
+                progressRing.style.visibility = 'visible';
+                progressRing.style.opacity = '1';
+            }
+            
+            // 버튼들 표시
+            const timerControls = document.querySelector('.timer-controls');
+            if (timerControls) {
+                timerControls.style.display = 'flex';
+            }
+            
+            // 타이머 시작
+            updateDisplay();
+            startTimer();
+            
+            // 음악 재생 시작 (타이머 시작과 함께)
+            if (backgroundMusic) {
+                console.log('타이머 시작과 함께 음악 재생 시도');
+                backgroundMusic.play().then(() => {
+                    console.log('음악 재생 성공');
+                }).catch(e => {
+                    console.log('음악 자동 재생 차단:', e.message);
+                    showMusicPlayButton();
+                });
+            }
+            
+            console.log('타이머 시작됨');
+        }
+        
+        // 즉시 초기화 (스크립트가 body 끝에 있으므로 DOM 요소들이 이미 로드됨)
+        setTimeout(() => {
+            showReadyState(); // 준비 상태로 시작
+        }, 100); // 약간의 지연을 두어 확실히 DOM이 준비되도록
+        
+        // 음악 로드만 (재생은 타이머 시작 시)
         if (backgroundMusic) {
             console.log('음악 요소 발견:', backgroundMusic.src);
+            console.log('준비 상태: 음악 로드만 하고 재생하지 않음');
             
             // 음악 상태 이벤트 리스너들
             backgroundMusic.addEventListener('loadstart', () => {
@@ -383,14 +498,11 @@ if (!$settings) {
             });
             
             backgroundMusic.addEventListener('canplay', () => {
-                console.log('음악 재생 가능');
-                // 즉시 재생 시도
-                tryPlayMusic();
+                console.log('음악 재생 준비 완료 (준비 상태에서는 재생하지 않음)');
             });
             
             backgroundMusic.addEventListener('canplaythrough', () => {
-                console.log('음악 완전 로드됨');
-                tryPlayMusic();
+                console.log('음악 완전 로드됨 (준비 상태에서는 재생하지 않음)');
             });
             
             backgroundMusic.addEventListener('error', (e) => {
@@ -407,59 +519,49 @@ if (!$settings) {
                 console.log('음악 일시정지됨');
             });
             
-            // 재생 시도 함수
-            function tryPlayMusic() {
-                if (backgroundMusic.readyState >= 2) { // HAVE_CURRENT_DATA
-                    backgroundMusic.play().then(() => {
-                        console.log('음악 재생 성공');
-                    }).catch(e => {
-                        console.log('음악 자동 재생 차단:', e.message);
-                        showMusicPlayButton();
-                    });
-                }
-            }
+            // 음악 로드만 시작 (재생은 하지 않음)
+            backgroundMusic.load();
+        }
+        </script>
+    
+    <script>
+        // 수동 재생 버튼 표시
+        function showMusicPlayButton() {
+            const playButton = document.createElement('button');
+            playButton.textContent = '🎵 음악 재생';
+            playButton.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #00ffff;
+                color: #000;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                z-index: 1000;
+                font-size: 14px;
+            `;
             
-            // 수동 재생 버튼 표시
-            function showMusicPlayButton() {
-                const playButton = document.createElement('button');
-                playButton.textContent = '🎵 음악 재생';
-                playButton.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #00ffff;
-                    color: #000;
-                    border: none;
-                    padding: 10px 20px;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    z-index: 1000;
-                    font-size: 14px;
-                `;
-                
-                playButton.onclick = () => {
+            playButton.onclick = () => {
+                if (typeof backgroundMusic !== 'undefined' && backgroundMusic) {
                     backgroundMusic.play().then(() => {
                         console.log('수동 음악 재생 성공');
                         playButton.remove();
                     }).catch(err => {
                         console.error('수동 음악 재생 실패:', err);
                     });
-                };
-                
-                document.body.appendChild(playButton);
-                
-                // 5초 후 자동 제거
-                setTimeout(() => {
-                    if (playButton.parentNode) {
-                        playButton.remove();
-                    }
-                }, 5000);
-            }
+                }
+            };
             
-            // 음악 로드 시작
-            backgroundMusic.load();
-        } else {
-            console.log('음악 요소가 없습니다.');
+            document.body.appendChild(playButton);
+            
+            // 5초 후 자동 제거
+            setTimeout(() => {
+                if (playButton.parentNode) {
+                    playButton.remove();
+                }
+            }, 5000);
         }
         
         // 전체화면 토글
@@ -517,16 +619,13 @@ if (!$settings) {
         document.addEventListener('mozfullscreenchange', updateFullscreenButton);
         document.addEventListener('MSFullscreenChange', updateFullscreenButton);
         
-        // 페이지 로드 후 자동 시작
+        // 페이지 로드 후 초기화 (자동 시작 제거)
         document.addEventListener('DOMContentLoaded', () => {
             updateFullscreenButton();
             updateDisplay();
             
-            // 페이지 로드 즉시 전체화면 시도 및 타이머 자동 시작
-            setTimeout(() => {
-                // 전체화면 시도 (페이지 이동으로 해제되었을 가능성)
-                attemptFullscreenAndStartTimer();
-            }, 100);
+            // 준비 상태로 시작 (자동 타이머 시작 제거)
+            console.log('페이지 로드됨 - 준비 상태로 대기');
         });
         
         // 전체화면 시도 및 타이머 시작
@@ -602,6 +701,58 @@ if (!$settings) {
             console.log('전체화면 안내 표시 요청됨 (비활성화됨)');
             // 더 이상 버튼 깜빡임 없음
         }
+        
+        // 키보드 이벤트 리스너 추가
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // 타이머가 완료된 상태인지 확인
+                if (!isRunning && endMessage.style.display === 'block') {
+                    // 타이머 완료 후 ESC: 설정 페이지로 이동
+                    exitFullscreen();
+                    setTimeout(() => {
+                        window.location.href = 'index.php';
+                    }, 300);
+                } else {
+                    // 타이머 실행 중 ESC: 일반 정지
+                    stopTimer();
+                }
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                
+                // 준비 상태에서 스페이스바 1번: 전체화면 전환
+                if (isReady && !isFullscreenReady) {
+                    console.log('스페이스바 1번: 전체화면 전환');
+                    toggleFullscreen();
+                    isFullscreenReady = true;
+                    return;
+                }
+                
+                // 전체화면 준비 상태에서 스페이스바 2번: 타이머 시작
+                if (isReady && isFullscreenReady) {
+                    console.log('스페이스바 2번: 타이머 시작');
+                    startTimerFromReady();
+                    return;
+                }
+                
+                // 타이머 실행 중 스페이스바: 일시정지/재생
+                if (isRunning) {
+                    togglePause();
+                }
+            } else if (e.key === 'F11') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        });
+        
+        // 이벤트 리스너 등록
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        pauseBtn.addEventListener('click', togglePause);
+        stopBtn.addEventListener('click', stopTimer);
+        
+        // 즉시 준비 상태로 시작 (타이머 자동 시작 방지)
+        setTimeout(() => {
+            showReadyState(); // 준비 상태로 시작
+        }, 100);
         
     </script>
 </body>

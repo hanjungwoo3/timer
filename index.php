@@ -58,7 +58,7 @@ $settings['online_music'] = '';
             <form method="POST" class="setup-form">
                        <div class="input-group">
                            <label for="title">제목 :</label>
-                           <textarea id="title" name="title" placeholder="타이머 제목을 입력하세요&#10;HTML 태그 사용 가능: &lt;font color=&quot;red&quot;&gt;빨간색&lt;/font&gt;" rows="3"><?= htmlspecialchars($settings['title']) ?></textarea>
+                           <textarea id="title" name="title" placeholder="타이머 제목을 입력하세요" rows="3"><?= htmlspecialchars($settings['title']) ?></textarea>
                        </div>
                 
                         <div class="input-group">
@@ -92,10 +92,6 @@ $settings['online_music'] = '';
                 
                        <div class="input-group">
                            <label for="online_music">배경음악 :</label>
-        <div class="traffic-info" style="font-size: 12px; margin-bottom: 5px;">
-            <div style="color: #4ecdc4;">✅ CDN 직접 연결만 시도 (서버 트래픽 0MB)</div>
-            <div style="color: #ffa500;">⚠️ 실패 시 음악 없이 진행 (프록시 사용 안 함)</div>
-        </div>
                             <div class="music-select-container">
                                 <select id="online_music" name="online_music">
                                     <option value="">음악을 선택하세요</option>
@@ -125,11 +121,6 @@ $settings['online_music'] = '';
                        <br>타이머 페이지에서 <kbd>스페이스바</kbd>를 눌러 전체화면으로 전환할 수 있습니다.
                    </div>
                    
-                   <div class="html-notice">
-                       🎨 제목에 HTML 태그를 사용할 수 있습니다:<br>
-                       <code>&lt;font color="red"&gt;빨간색 텍스트&lt;/font&gt;</code><br>
-                       <code>&lt;b&gt;굵은 글씨&lt;/b&gt;</code>, <code>&lt;i&gt;기울임&lt;/i&gt;</code>, <code>&lt;u&gt;밑줄&lt;/u&gt;</code>
-                   </div>
         </div>
     </div>
     
