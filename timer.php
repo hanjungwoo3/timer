@@ -30,10 +30,11 @@ if (!$settings) {
             
             <div class="timer-display-container">
                 <div class="circular-progress">
-                    <svg class="progress-ring" viewBox="0 0 400 400">
-                        <circle class="progress-ring-background" cx="200" cy="200" r="160" />
-                        <circle class="progress-ring-circle" cx="200" cy="200" r="160" />
-                    </svg>
+            <svg class="progress-ring" viewBox="0 0 400 400">
+                <circle class="progress-ring-background" cx="200" cy="200" r="160" />
+                <circle class="progress-ring-circle" cx="200" cy="200" r="160" />
+                <g class="progress-ring-ticks"></g>
+            </svg>
                            <div class="timer-display" id="timerDisplay">
                                <?= sprintf('%02d:%02d', $settings['minutes'], isset($settings['seconds']) ? $settings['seconds'] : 0) ?>
                            </div>
@@ -167,20 +168,76 @@ if (!$settings) {
         progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
         progressRing.style.strokeDashoffset = 0; // 초기값을 0으로 설정 (100% 상태)
         
+        // 진행바 구분선 생성 함수
+        function createProgressTicks() {
+            const ticksContainer = document.querySelector('.progress-ring-ticks');
+            const totalSeconds = <?= $settings['minutes'] * 60 + (isset($settings['seconds']) ? $settings['seconds'] : 0) ?>;
+            const radius = 160;
+            
+            // 기존 구분선 제거
+            ticksContainer.innerHTML = '';
+            
+            // 1초 단위로 구분선 생성 (최대 300초까지만)
+            if (totalSeconds <= 300) {
+                const tickInterval = 1; // 1초 간격
+                
+                // 0초부터 totalSeconds까지 틱 생성 (시작점 포함)
+                for (let i = 0; i <= totalSeconds; i += tickInterval) {
+                    // 진행바와 정확히 같은 방식으로 각도 계산
+                    const remainingAtTick = totalSeconds - i;
+                    const tickPercent = (remainingAtTick / totalSeconds) * 100;
+                    // 진행바와 동일한 각도 계산: 12시 방향에서 시계방향으로
+                    const angle = -90 + (tickPercent / 100) * 360;
+                    const radian = (angle * Math.PI) / 180;
+                    
+                    // 0초(시작점)와 5초 단위는 긴 구분선, 1초 단위는 짧은 구분선
+                    const isMainTick = (i === 0 || i % 5 === 0);
+                    const tickLength = isMainTick ? 12 : 6;
+                    const tickWidth = isMainTick ? 1.5 : 1;
+                    const tickOpacity = isMainTick ? 0.4 : 0.25;
+                    
+                    // 구분선 시작점 (바깥쪽)
+                    const x1 = 200 + (radius + tickLength) * Math.cos(radian);
+                    const y1 = 200 + (radius + tickLength) * Math.sin(radian);
+                    
+                    // 구분선 끝점 (안쪽)
+                    const x2 = 200 + (radius - tickLength) * Math.cos(radian);
+                    const y2 = 200 + (radius - tickLength) * Math.sin(radian);
+                    
+                    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    tick.setAttribute('x1', x1);
+                    tick.setAttribute('y1', y1);
+                    tick.setAttribute('x2', x2);
+                    tick.setAttribute('y2', y2);
+                    tick.setAttribute('stroke', '#555555');
+                    tick.setAttribute('stroke-width', tickWidth);
+                    tick.setAttribute('opacity', tickOpacity);
+                    
+                    ticksContainer.appendChild(tick);
+                }
+            }
+        }
+
         // 진행바 업데이트 함수 (남은 시간에 따라 원이 줄어듦)
         function setProgress(percent) {
-            // percent가 100%일 때 offset = 0 (완전한 원)
-            // percent가 0%일 때 offset = circumference (원이 사라짐)
-            const offset = circumference * (1 - percent / 100);
+            const totalSeconds = <?= $settings['minutes'] * 60 + (isset($settings['seconds']) ? $settings['seconds'] : 0) ?>;
+            
+            // 남은 시간을 기준으로 정확한 퍼센트 계산
+            const exactPercent = (remainingSeconds / totalSeconds) * 100;
+            
+            // 틱과 동일한 방식으로 계산
+            // exactPercent가 100%일 때 offset = circumference (완전한 원)
+            // exactPercent가 0%일 때 offset = 0 (원이 사라짐)
+            const offset = circumference * (exactPercent / 100);
             progressRing.style.strokeDashoffset = offset;
             
             // 마지막 1분일 때 색상 변경
             if (remainingSeconds <= 60 && remainingSeconds > 0) {
-                progressRing.style.stroke = '#404040'; // 진행바 매우 어두운 회색
-                timerDisplay.style.color = '#404040'; // 타이머 숫자도 매우 어두운 회색
+                progressRing.style.stroke = '#202020'; // 진행바 매우 매우 어두운 회색
+                timerDisplay.style.color = '#404040'; // 타이머 숫자는 그대로 유지
             } else {
-                progressRing.style.stroke = '#606060'; // 진행바 어두운 회색 (1분 이전 색상)
-                timerDisplay.style.color = '#606060'; // 타이머 숫자도 어두운 회색
+                progressRing.style.stroke = '#202020'; // 진행바 1분 남았을 때와 동일한 색상
+                timerDisplay.style.color = '#404040'; // 타이머 숫자도 어두운 회색
             }
         }
         
@@ -448,6 +505,9 @@ if (!$settings) {
             const timerTitle = document.querySelector('.timer-title');
             timerTitle.style.display = 'block';
             timerTitle.style.fontSize = 'clamp(20px, 4vw, 48px)'; // 원래 크기 유지
+            
+            // 진행바 구분선 미리 생성 (준비 상태에서도 보이도록)
+            createProgressTicks();
             
             // 현재 시간 표시 요소 생성
             createCurrentTimeDisplay();
