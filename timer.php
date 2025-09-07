@@ -174,13 +174,13 @@ if (!$settings) {
             const offset = circumference * (1 - percent / 100);
             progressRing.style.strokeDashoffset = offset;
             
-            // 마지막 30초일 때 색상 변경
-            if (remainingSeconds <= 30 && remainingSeconds > 0) {
-                progressRing.style.stroke = '#606060'; // 진행바 어두운 회색
-                timerDisplay.style.color = '#606060'; // 타이머 숫자도 어두운 회색
+            // 마지막 1분일 때 색상 변경
+            if (remainingSeconds <= 60 && remainingSeconds > 0) {
+                progressRing.style.stroke = '#404040'; // 진행바 매우 어두운 회색
+                timerDisplay.style.color = '#404040'; // 타이머 숫자도 매우 어두운 회색
             } else {
-                progressRing.style.stroke = '#808080'; // 진행바 회색
-                timerDisplay.style.color = '#808080'; // 타이머 숫자도 회색
+                progressRing.style.stroke = '#606060'; // 진행바 어두운 회색 (1분 이전 색상)
+                timerDisplay.style.color = '#606060'; // 타이머 숫자도 어두운 회색
             }
         }
         
@@ -201,26 +201,10 @@ if (!$settings) {
             }
         }
         
-        // 깜빡임 애니메이션 (크기 증가 + 페이드 아웃 효과)
+        // 깜빡임 애니메이션 (완전히 제거)
         function startBlinkAnimation() {
-            // 애니메이션 시작: 크게 확대 + 불투명도 증가
-            timerDisplay.style.transform = 'translate(-50%, -50%) scale(1.15)'; // 1.03에서 1.15로 증가
-            timerDisplay.style.fontWeight = '900';
-            timerDisplay.style.opacity = '1';
-            timerDisplay.style.transition = 'transform 0.1s ease-out, opacity 0.3s ease-out';
-            
-            // 페이드 아웃 효과와 함께 원래 크기로 복원
-            setTimeout(() => {
-                timerDisplay.style.transform = 'translate(-50%, -50%) scale(1)';
-                timerDisplay.style.fontWeight = 'bold';
-                timerDisplay.style.opacity = '0.8'; // 페이드 아웃 효과
-            }, 100);
-            
-            // 완전히 원래 상태로 복원
-            setTimeout(() => {
-                timerDisplay.style.opacity = '1';
-                timerDisplay.style.transition = 'none'; // 트랜지션 제거
-            }, 400);
+            // 애니메이션 없음 - 색상과 크기 완전 고정
+            // 필요시 여기에 다른 효과 추가 가능
         }
         
         // 전체화면 해제 함수
