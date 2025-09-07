@@ -21,7 +21,7 @@ if (!$settings) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($settings['title']) ?> - 타이머</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=<?= filemtime('style.css') ?>">
 </head>
 <body class="timer-body">
     <div class="timer-container">
@@ -395,7 +395,10 @@ if (!$settings) {
         }
         
         // 음악 페이드 아웃 함수
-        function fadeOutMusic(audioElement, duration = 2000) {
+        function fadeOutMusic(audioElement, duration) {
+            if (typeof duration === 'undefined') {
+                duration = 2000;
+            }
             if (!audioElement || audioElement.paused) return;
             
             const originalVolume = audioElement.volume;

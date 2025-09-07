@@ -48,7 +48,7 @@ $settings['online_music'] = '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>타이머 설정</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=<?= filemtime('style.css') ?>">
 </head>
 <body>
     <div class="container">
