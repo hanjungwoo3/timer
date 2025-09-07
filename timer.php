@@ -59,7 +59,7 @@ if (!$settings) {
         // CDN 직접 연결만 시도 (프록시 사용 안 함)
         $direct_url = $music_url;
     ?>
-        <audio id="backgroundMusic" loop preload="auto">
+        <audio id="backgroundMusic" preload="auto">
             <!-- CDN 직접 연결만 시도 -->
             <source src="<?= htmlspecialchars($direct_url) ?>" type="audio/mpeg">
             브라우저가 오디오를 지원하지 않습니다.
@@ -402,33 +402,14 @@ if (!$settings) {
             isFullscreenReady = false;
             isRunning = false;
             
-            // 타이머 디스플레이 컨테이너 전체 숨기기
-            const timerDisplayContainer = document.querySelector('.timer-display-container');
-            if (timerDisplayContainer) {
-                timerDisplayContainer.style.display = 'none';
-            }
-            
-            // 버튼들 숨기기
-            const timerControls = document.querySelector('.timer-controls');
-            if (timerControls) {
-                timerControls.style.display = 'none';
-            }
-            
-            // 진행바 완전히 숨기기 (처음부터 보이지 않도록)
-            const progressRing = document.querySelector('.progress-ring-circle');
-            if (progressRing) {
-                progressRing.style.visibility = 'hidden';
-                progressRing.style.opacity = '0';
-            }
+            // CSS에서 기본적으로 숨겨져 있으므로 별도 숨김 처리 불필요
             
             // 제목만 표시 (원래 전체화면 크기와 동일)
             const timerTitle = document.querySelector('.timer-title');
             timerTitle.style.display = 'block';
             timerTitle.style.fontSize = 'clamp(20px, 4vw, 48px)'; // 원래 크기 유지
             
-            // 안내 메시지 제거 (사용자 요청)
-            
-            console.log('준비 상태: 제목만 표시, 진행바 숨김');
+            console.log('준비 상태: 제목만 표시 (타이머 요소들은 CSS에서 기본 숨김)');
         }
         
         // 타이머 시작 (준비 상태에서 실행 상태로)
@@ -444,7 +425,7 @@ if (!$settings) {
             // 타이머 디스플레이 컨테이너 표시
             const timerDisplayContainer = document.querySelector('.timer-display-container');
             if (timerDisplayContainer) {
-                timerDisplayContainer.style.display = 'block';
+                timerDisplayContainer.style.display = 'flex'; // CSS 기본값이 none이므로 flex로 변경
             }
             
             // 진행바 다시 보이기
@@ -457,7 +438,7 @@ if (!$settings) {
             // 버튼들 표시
             const timerControls = document.querySelector('.timer-controls');
             if (timerControls) {
-                timerControls.style.display = 'flex';
+                timerControls.style.display = 'flex'; // CSS 기본값이 none이므로 flex로 변경
             }
             
             // 타이머 시작

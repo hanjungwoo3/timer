@@ -249,7 +249,7 @@ kbd {
 /* 원형 진행바 컨테이너 */
 .timer-display-container {
     position: relative;
-    display: flex;
+    display: none; /* 기본적으로 숨김 */
     justify-content: center;
     align-items: center;
 }
@@ -281,6 +281,8 @@ kbd {
     stroke-width: 60; /* 진행바 두께 4배 증가 (30 → 60) */
     stroke-linecap: butt;
     transition: stroke-dashoffset 0.5s ease-in-out, stroke 0.3s ease;
+    visibility: hidden; /* 기본적으로 숨김 */
+    opacity: 0;
 }
 
 /* 타이머 디스플레이 */
@@ -322,7 +324,7 @@ kbd {
 
 /* 타이머 컨트롤 */
 .timer-controls {
-    display: flex;
+    display: none; /* 기본적으로 숨김 */
     gap: 20px;
     margin-top: 20px;
 }
@@ -637,7 +639,7 @@ select option {
     margin: 0; /* 모든 마진 제거 */
     padding: 0 20px; /* 좌우 여백만 추가 */
     color: #888888; /* 회색 */
-    font-size: clamp(24px, 4vw, 48px);
+    font-size: clamp(12px, 2vw, 24px); /* 폰트 크기 절반으로 감소 */
     font-weight: bold;
     text-align: center; /* 텍스트 중앙 정렬 */
     z-index: 1000;
