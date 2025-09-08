@@ -402,13 +402,13 @@ kbd {
     border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* 종료 메시지 */
-.end-message {
-    font-size: clamp(40px, 8vw, 80px);
-    font-weight: bold;
-    color: #27ae60;
+/* 안내 메시지 */
+.guide-message {
+    font-size: clamp(16px, 3vw, 24px);
+    font-weight: normal;
+    color: #888888;
     text-align: center;
-    animation: fadeInScale 0.5s ease-out;
+    opacity: 0.8;
 }
 
 @keyframes fadeInScale {
@@ -686,20 +686,34 @@ select option {
     font-style: italic;
 }
 
-/* 종료 메시지 스타일 */
-.end-message {
+/* 안내 메시지 스타일 */
+.guide-message {
     position: fixed;
-    top: 60vh;
-    left: 0; /* 전체 너비 기준으로 시작 */
-    right: 0; /* 전체 너비 기준으로 끝 */
-    width: 100vw; /* 전체 뷰포트 너비 사용 */
-    margin: 0; /* 모든 마진 제거 */
-    padding: 0 20px; /* 좌우 여백만 추가 */
-    color: #888888; /* 회색 */
-    font-size: clamp(12px, 2vw, 24px); /* 폰트 크기 절반으로 감소 */
-    font-weight: bold;
-    text-align: center; /* 텍스트 중앙 정렬 */
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    min-height: 50px;
+    margin: 0;
+    padding: 15px 20px;
+    color: #ffffff;
+    font-size: clamp(16px, 3vw, 24px);
+    font-weight: normal;
+    text-align: center;
     z-index: 1000;
-    white-space: pre-line;
-    transform: translateY(-50%); /* 세로 중앙 정렬만 유지 */
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 메시지 라인 */
+.guide-message .message-line {
+    display: block;
+    white-space: nowrap;
+    overflow: visible;
+    max-width: none;
+    width: 100%;
+    transition: opacity 2s ease-in-out;
+    opacity: 0;
 }

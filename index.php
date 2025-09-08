@@ -101,8 +101,8 @@ $settings['online_music'] = '';
                        </div>
                 
                 <div class="input-group">
-                    <label for="end_message">종료 메시지 :</label>
-                    <input type="text" id="end_message" name="end_message" value="<?= htmlspecialchars($settings['end_message']) ?>" placeholder="타이머 완료 메시지">
+                    <label for="end_message">안내 메시지 :</label>
+                    <textarea id="end_message" name="end_message" rows="4" placeholder="타이머 진행 중 안내 메시지 (줄바꿈으로 여러 줄 입력 가능)"><?= htmlspecialchars($settings['end_message']) ?></textarea>
                 </div>
                 
                         <div class="input-group">
@@ -343,7 +343,7 @@ $settings['online_music'] = '';
             console.log('타이머 시작 - 설정 정보:');
             console.log('- 제목:', title);
             console.log('- 시간:', minutes, '분', seconds, '초');
-            console.log('- 종료 메시지:', endMessage);
+            console.log('- 안내 메시지:', endMessage);
             console.log('- 선택된 음악:', selectedMusic);
             
             if (!selectedMusic) {

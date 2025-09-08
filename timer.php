@@ -50,8 +50,8 @@ if (!$settings) {
             </div>
             
             
-            <div id="endMessage" class="end-message" style="display: none;">
-                <?= htmlspecialchars($settings['end_message']) ?>
+            <div id="guideMessage" class="guide-message" style="display: none;">
+                <span class="message-line"></span>
             </div>
         </div>
     </div>
@@ -157,8 +157,14 @@ if (!$settings) {
         
         // DOM 요소
         const timerDisplay = document.getElementById('timerDisplay');
-        const endMessage = document.getElementById('endMessage');
+        const guideMessage = document.getElementById('guideMessage');
         const progressRing = document.querySelector('.progress-ring-circle');
+        
+        // 안내 메시지 관련 변수
+        const GUIDE_MESSAGES = <?= json_encode(array_filter(explode("\n", $settings['end_message']), function($line) { return trim($line) !== ''; })) ?>;
+        let currentMessageIndex = 0;
+        let messageInterval = null;
+        let isRestPeriod = false;
         // backgroundMusic은 위에서 이미 선언됨
         
         // 진행바 설정
@@ -277,6 +283,102 @@ if (!$settings) {
             }
         }
 
+        // 안내 메시지 순환 표시 함수
+        function startMessageRotation() {
+            if (!GUIDE_MESSAGES || GUIDE_MESSAGES.length === 0) {
+                console.log('안내 메시지가 없습니다');
+                return;
+            }
+            
+            const messageLine = guideMessage.querySelector('.message-line');
+            
+            function showNextMessage() {
+                // 휴식 시간인지 확인
+                if (isRestPeriod) {
+                    messageLine.style.opacity = '0';
+                    console.log('휴식 시간: 10초 대기');
+                    
+                    // 기존 타이머 정리
+                    if (messageInterval) {
+                        clearInterval(messageInterval);
+                        messageInterval = null;
+                        console.log('기존 타이머 정리됨');
+                    }
+                    
+                    setTimeout(() => {
+                        isRestPeriod = false;
+                        currentMessageIndex = 0; // 첫 번째 메시지부터 다시 시작
+                        console.log('휴식 후 다시 시작, 현재 인덱스:', currentMessageIndex);
+                        
+                        // 첫 번째 메시지 표시
+                        showMessage();
+                        
+                        // 새로운 타이머 시작
+                        messageInterval = setInterval(showNextMessage, 7000);
+                        console.log('새로운 타이머 시작됨');
+                    }, 10000); // 10초 휴식
+                    return;
+                }
+                
+                showMessage();
+            }
+            
+            function showMessage() {
+                // 현재 메시지 인덱스 확인
+                console.log('메시지 표시:', currentMessageIndex, '/', GUIDE_MESSAGES.length);
+                
+                // Fade out
+                messageLine.style.opacity = '0';
+                
+                setTimeout(() => {
+                    // 인덱스가 유효한지 확인
+                    if (currentMessageIndex >= GUIDE_MESSAGES.length) {
+                        console.log('모든 메시지 완료, 휴식 시간 시작');
+                        isRestPeriod = true;
+                        return;
+                    }
+                    
+                    // 메시지 변경
+                    messageLine.textContent = GUIDE_MESSAGES[currentMessageIndex];
+                    console.log('표시된 메시지:', GUIDE_MESSAGES[currentMessageIndex]);
+                    
+                    // Fade in
+                    messageLine.style.opacity = '1';
+                    
+                    // 다음 메시지 인덱스 설정
+                    currentMessageIndex++;
+                    
+                    // 모든 메시지를 다 보여줬으면 휴식 시간 설정
+                    if (currentMessageIndex >= GUIDE_MESSAGES.length) {
+                        console.log('다음 턴에 휴식 시간');
+                        isRestPeriod = true;
+                    }
+                }, 2000); // fade out 시간 (조금 더 빠르게)
+            }
+            
+            // 5초 후에 첫 번째 메시지 표시
+            setTimeout(() => {
+                console.log('첫 번째 메시지 표시 시작');
+                messageLine.textContent = GUIDE_MESSAGES[currentMessageIndex];
+                messageLine.style.opacity = '1';
+                console.log('첫 번째 메시지:', GUIDE_MESSAGES[currentMessageIndex]);
+                currentMessageIndex = 1; // 다음은 두 번째 메시지
+                
+                // 7초마다 메시지 변경 (조금 더 빠르게)
+                messageInterval = setInterval(showNextMessage, 7000);
+            }, 5000); // 5초 지연
+            
+            console.log('안내 메시지 순환 시작:', GUIDE_MESSAGES);
+        }
+        
+        function stopMessageRotation() {
+            if (messageInterval) {
+                clearInterval(messageInterval);
+                messageInterval = null;
+                console.log('안내 메시지 순환 중지');
+            }
+        }
+
         // 타이머 메인 로직
         function startTimer() {
             // 이미 실행 중인 타이머가 있으면 중지
@@ -323,11 +425,12 @@ if (!$settings) {
                 timerTitle.style.display = 'block';
             }
             
-            // 종료 메시지 표시
-            endMessage.style.display = 'block';
+            // 안내 메시지 숨김 (타이머 완료)
+            guideMessage.style.display = 'none';
+            stopMessageRotation();
             
-            // 종료 메시지 표시 후 전체화면 상태 유지
-            console.log('타이머 완료 - 종료 메시지 표시 중, 전체화면 유지');
+            // 타이머 완료 후 전체화면 상태 유지
+            console.log('타이머 완료 - 전체화면 유지');
             
             // 안내 메시지 제거 (사용자 요청)
         }
@@ -745,6 +848,14 @@ if (!$settings) {
             // 현재 시간 표시 제거
             removeCurrentTimeDisplay();
             
+            // 안내 메시지 표시 (타이머 시작 시)
+            if (guideMessage && GUIDE_MESSAGES.length > 0) {
+                guideMessage.style.display = 'block';
+                startMessageRotation();
+            } else {
+                console.log('안내 메시지가 없거나 요소를 찾을 수 없음');
+            }
+            
             // 타이머 디스플레이 컨테이너 표시
             const timerDisplayContainer = document.querySelector('.timer-display-container');
             if (timerDisplayContainer) {
@@ -1013,6 +1124,15 @@ if (!$settings) {
             }
             
             isRunning = true;
+            
+            // 안내 메시지 표시 (타이머 시작 시)
+            if (guideMessage && GUIDE_MESSAGES.length > 0) {
+                guideMessage.style.display = 'block';
+                startMessageRotation();
+            } else {
+                console.log('안내 메시지가 없거나 요소를 찾을 수 없음');
+            }
+            
             startTimer();
             console.log('타이머 자동 시작됨');
         }
@@ -1028,7 +1148,7 @@ if (!$settings) {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 // 타이머가 완료된 상태인지 확인
-                if (!isRunning && endMessage.style.display === 'block') {
+                if (!isRunning && !messageInterval) {
                     // 타이머 완료 후 ESC: 설정 페이지로 이동
                     exitFullscreen();
                     setTimeout(() => {
