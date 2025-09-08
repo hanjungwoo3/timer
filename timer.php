@@ -22,6 +22,13 @@ if (!$settings) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($settings['title']) ?> - 타이머</title>
     <link rel="stylesheet" href="style.css?v=<?= filemtime('style.css') ?>">
+    <style>
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+            100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+        }
+    </style>
 </head>
 <body class="timer-body">
     <div class="timer-container">
@@ -409,11 +416,48 @@ if (!$settings) {
                 font-family: 'Courier New', monospace;
             `;
             
+            // 전체화면 안내 메시지 요소 생성
+            const fullscreenNotice = document.createElement('div');
+            fullscreenNotice.id = 'fullscreenNotice';
+            fullscreenNotice.style.cssText = `
+                position: fixed;
+                top: 85vh;
+                left: 50%;
+                transform: translateX(-50%);
+                color: #888888;
+                font-size: clamp(14px, 2.2vw, 28px);
+                font-weight: bold;
+                text-align: center;
+                z-index: 1000;
+                font-family: 'Arial', sans-serif;
+                background: rgba(136, 136, 136, 0.1);
+                padding: 8px 16px;
+                border-radius: 8px;
+                border: 1px solid rgba(136, 136, 136, 0.3);
+                animation: pulse 2s infinite;
+                display: none;
+                cursor: pointer;
+            `;
+            fullscreenNotice.innerHTML = '전체 화면으로 전환하세요<br><span style="font-size: 0.7em; opacity: 0.8;">(스페이스바를 누르거나, 클릭)</span>';
+            
+            // 클릭 시 전체화면 전환
+            fullscreenNotice.addEventListener('click', function() {
+                if (isReady && !isFullscreenReady) {
+                    console.log('전체화면 안내 메시지 클릭: 전체화면 전환');
+                    toggleFullscreen();
+                    isFullscreenReady = true;
+                }
+            });
+            
             document.body.appendChild(currentTimeDisplay);
             document.body.appendChild(startTimeDisplay);
+            document.body.appendChild(fullscreenNotice);
             
             // 타이머 시작시간 표시
             updateStartTimeDisplay();
+            
+            // 전체화면 상태 체크 및 안내 메시지 표시
+            updateFullscreenNotice();
             
             // 현재 시간 업데이트 시작
             updateCurrentTime();
@@ -422,6 +466,15 @@ if (!$settings) {
             // 자동 시작 시간 체크 시작
             checkAutoStart();
             autoStartInterval = setInterval(checkAutoStart, 1000);
+            
+            // 전체화면 상태 변화 감지
+            document.addEventListener('fullscreenchange', updateFullscreenNotice);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenNotice);
+            document.addEventListener('mozfullscreenchange', updateFullscreenNotice);
+            document.addEventListener('MSFullscreenChange', updateFullscreenNotice);
+            
+            // 주기적으로 전체화면 상태 체크 (안전장치)
+            setInterval(updateFullscreenNotice, 1000);
         }
         
         // 현재 시간 업데이트
@@ -434,6 +487,9 @@ if (!$settings) {
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 currentTimeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
             }
+            
+            // 타이머 시작시간도 함께 업데이트 (남은 시간 실시간 계산)
+            updateStartTimeDisplay();
         }
         
         // 타이머 시작시간 표시 업데이트
@@ -444,11 +500,48 @@ if (!$settings) {
                 const autoStartMinute = <?= isset($settings['auto_start_minute']) ? $settings['auto_start_minute'] : 0 ?>;
                 
                 if (autoStartHour === -1) {
-                    startTimeDisplay.textContent = '(자동 시작 사용 안함)';
+                    startTimeDisplay.textContent = '자동 시작 사용 안함';
                 } else {
                     const hourStr = String(autoStartHour).padStart(2, '0');
                     const minuteStr = String(autoStartMinute).padStart(2, '0');
-                    startTimeDisplay.textContent = `(타이머 시작시간: ${hourStr}:${minuteStr})`;
+                    
+                    // 현재 시간과 시작 시간의 차이 계산
+                    const now = new Date();
+                    const startTime = new Date();
+                    startTime.setHours(autoStartHour, autoStartMinute, 0, 0);
+                    
+                    // 시작 시간이 현재 시간보다 이전이면 다음날로 설정
+                    if (startTime <= now) {
+                        startTime.setDate(startTime.getDate() + 1);
+                    }
+                    
+                    const timeDiff = startTime - now;
+                    const remainingHours = Math.floor(timeDiff / (1000 * 60 * 60));
+                    const remainingMinutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                    const remainingSeconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+                    
+                    const remainingHourStr = String(remainingHours).padStart(2, '0');
+                    const remainingMinuteStr = String(remainingMinutes).padStart(2, '0');
+                    const remainingSecondStr = String(remainingSeconds).padStart(2, '0');
+                    
+                    startTimeDisplay.innerHTML = `타이머 시작시간: ${hourStr}:${minuteStr}<br><span style="font-size: 0.8em; opacity: 0.7;">(${remainingHourStr}:${remainingMinuteStr}:${remainingSecondStr} 후에 자동 시작됩니다.)</span>`;
+                }
+            }
+        }
+        
+        // 전체화면 안내 메시지 업데이트
+        function updateFullscreenNotice() {
+            const fullscreenNotice = document.getElementById('fullscreenNotice');
+            if (fullscreenNotice && isReady) {
+                const isFullscreen = document.fullscreenElement || 
+                                   document.webkitFullscreenElement || 
+                                   document.mozFullScreenElement || 
+                                   document.msFullscreenElement;
+                
+                if (!isFullscreen) {
+                    fullscreenNotice.style.display = 'block';
+                } else {
+                    fullscreenNotice.style.display = 'none';
                 }
             }
         }
@@ -463,6 +556,11 @@ if (!$settings) {
             const startTimeDisplay = document.getElementById('startTimeDisplay');
             if (startTimeDisplay) {
                 startTimeDisplay.remove();
+            }
+            
+            const fullscreenNotice = document.getElementById('fullscreenNotice');
+            if (fullscreenNotice) {
+                fullscreenNotice.remove();
             }
             
             if (currentTimeInterval) {
