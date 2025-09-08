@@ -42,11 +42,6 @@ if (!$settings) {
                 </div>
             </div>
             
-            <div class="timer-controls">
-                <button id="fullscreenBtn" class="control-btn" title="전체화면 (F11 또는 Space)">⛶</button>
-                <button id="pauseBtn" class="control-btn" title="일시정지/재생 (전체화면에서 Space)">⏸</button>
-                <button id="stopBtn" class="control-btn" title="정지 (ESC)">⏹</button>
-            </div>
             
             <div id="endMessage" class="end-message" style="display: none;">
                 <?= htmlspecialchars($settings['end_message']) ?>
@@ -155,9 +150,6 @@ if (!$settings) {
         
         // DOM 요소
         const timerDisplay = document.getElementById('timerDisplay');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const stopBtn = document.getElementById('stopBtn');
         const endMessage = document.getElementById('endMessage');
         const progressRing = document.querySelector('.progress-ring-circle');
         // backgroundMusic은 위에서 이미 선언됨
@@ -316,8 +308,7 @@ if (!$settings) {
             // 진행바 숨기기
             document.querySelector('.circular-progress').style.display = 'none';
             
-            // 컨트롤 버튼들 숨기기
-            document.querySelector('.timer-controls').style.display = 'none';
+            // 컨트롤 버튼들이 삭제되어 숨길 필요 없음
             
             // 제목 표시 유지 (종료 화면에서도 제목이 보이도록)
             const timerTitle = document.querySelector('.timer-title');
@@ -337,7 +328,6 @@ if (!$settings) {
         // 일시정지/재생 토글
         function togglePause() {
             isPaused = !isPaused;
-            pauseBtn.textContent = isPaused ? '▶' : '⏸';
             
             if (backgroundMusic) {
                 if (isPaused) {
@@ -346,6 +336,8 @@ if (!$settings) {
                     backgroundMusic.play();
                 }
             }
+            
+            console.log(isPaused ? '타이머 일시정지' : '타이머 재개');
         }
         
         // 타이머 정지 (수동 정지 - 트레이로 보내지 않음)
@@ -502,6 +494,10 @@ if (!$settings) {
             const timerTitle = document.querySelector('.timer-title');
             timerTitle.style.display = 'block';
             timerTitle.style.fontSize = 'clamp(20px, 4.5vw, 54px)'; // 더 줄인 크기로 설정
+            timerTitle.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+            
+            // 제목 클릭 이벤트 리스너 추가 (스페이스키와 동일한 기능)
+            timerTitle.addEventListener('click', handleReadyStateClick);
             
             // 진행바 구분선 미리 생성 (준비 상태에서도 보이도록)
             createProgressTicks();
@@ -510,6 +506,32 @@ if (!$settings) {
             createCurrentTimeDisplay();
             
             console.log('준비 상태: 제목과 현재 시간 표시');
+        }
+        
+        // 대기 상태에서 제목 클릭 처리 (스페이스키와 동일한 기능)
+        function handleReadyStateClick() {
+            // 준비 상태에서 클릭 1번: 전체화면 전환
+            if (isReady && !isFullscreenReady) {
+                console.log('제목 클릭 1번: 전체화면 전환');
+                toggleFullscreen();
+                isFullscreenReady = true;
+                return;
+            }
+            
+            // 전체화면 준비 상태에서 클릭 2번: 타이머 시작
+            if (isReady && isFullscreenReady) {
+                console.log('제목 클릭 2번: 타이머 시작');
+                startTimerFromReady();
+                return;
+            }
+        }
+        
+        // 타이머 화면에서 제목 클릭 처리 (일시정지/재생 토글)
+        function handleTimerStateClick() {
+            if (isRunning) {
+                console.log('제목 클릭: 일시정지/재생 토글');
+                togglePause();
+            }
         }
         
         // 타이머 시작 (준비 상태에서 실행 상태로)
@@ -538,10 +560,28 @@ if (!$settings) {
                 progressRing.style.opacity = '1';
             }
             
-            // 버튼들 표시
-            const timerControls = document.querySelector('.timer-controls');
-            if (timerControls) {
-                timerControls.style.display = 'flex'; // CSS 기본값이 none이므로 flex로 변경
+            // 컨트롤 버튼들이 삭제되어 표시할 필요 없음
+            
+            // 타이머 화면에서 클릭 기능 추가 (제목, 타이머 숫자, 진행바)
+            const timerTitle = document.querySelector('.timer-title');
+            const timerDisplay = document.querySelector('.timer-display');
+            const circularProgress = document.querySelector('.circular-progress');
+            
+            if (timerTitle) {
+                timerTitle.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                // 기존 이벤트 리스너 제거 후 새로운 기능 추가
+                timerTitle.removeEventListener('click', handleReadyStateClick);
+                timerTitle.addEventListener('click', handleTimerStateClick);
+            }
+            
+            if (timerDisplay) {
+                timerDisplay.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                timerDisplay.addEventListener('click', handleTimerStateClick);
+            }
+            
+            if (circularProgress) {
+                circularProgress.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                circularProgress.addEventListener('click', handleTimerStateClick);
             }
             
             // 타이머 시작
@@ -828,10 +868,7 @@ if (!$settings) {
             }
         });
         
-        // 이벤트 리스너 등록
-        fullscreenBtn.addEventListener('click', toggleFullscreen);
-        pauseBtn.addEventListener('click', togglePause);
-        stopBtn.addEventListener('click', stopTimer);
+        // 컨트롤 버튼들이 삭제되어 이벤트 리스너 등록 불필요
         
         // 즉시 준비 상태로 시작 (타이머 자동 시작 방지)
         setTimeout(() => {
