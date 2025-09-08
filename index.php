@@ -8,7 +8,9 @@ session_start();
                 'minutes' => (int)(isset($_POST['minutes']) ? $_POST['minutes'] : 5),
                 'seconds' => (int)(isset($_POST['seconds']) ? $_POST['seconds'] : 0),
                 'end_message' => isset($_POST['end_message']) ? $_POST['end_message'] : '완료!',
-                'online_music' => isset($_POST['online_music']) ? $_POST['online_music'] : ''
+                'online_music' => isset($_POST['online_music']) ? $_POST['online_music'] : '',
+                'auto_start_hour' => (int)(isset($_POST['auto_start_hour']) ? $_POST['auto_start_hour'] : -1),
+                'auto_start_minute' => (int)(isset($_POST['auto_start_minute']) ? $_POST['auto_start_minute'] : 0)
             );
     
     // JSON 파일로 저장 (모든 설정 포함)
@@ -23,12 +25,17 @@ session_start();
 }
 
         // 저장된 설정 불러오기 (JSON 파일 우선, 없으면 기본값)
+        // 요일에 따른 기본 자동 시작시간 설정 (타이머 시간만큼 앞당김)
+        $today = date('w'); // 0=일요일, 1=월요일, ..., 6=토요일
+        
         $default_settings = array(
             'title' => '타이머',
             'minutes' => 5,
             'seconds' => 0,
             'end_message' => '완료!',
-            'online_music' => ''
+            'online_music' => '',
+            'auto_start_hour' => -1,
+            'auto_start_minute' => 0
         );
 
 if (file_exists('timer_settings.json')) {
@@ -37,6 +44,38 @@ if (file_exists('timer_settings.json')) {
 } else {
     $settings = isset($_SESSION['timer_settings']) ? $_SESSION['timer_settings'] : $default_settings;
 }
+
+// 타이머 시간을 고려한 자동 시작시간 계산
+$timer_minutes = isset($settings['minutes']) ? $settings['minutes'] : 5;
+$timer_seconds = isset($settings['seconds']) ? $settings['seconds'] : 0;
+$total_timer_seconds = ($timer_minutes * 60) + $timer_seconds;
+
+// 목표 완료 시간 설정
+if ($today == 0) {
+    // 일요일: 13시 0분에 완료되도록
+    $target_hour = 13;
+    $target_minute = 0;
+} else {
+    // 평일: 19시 30분에 완료되도록
+    $target_hour = 19;
+    $target_minute = 30;
+}
+
+// 목표 시간에서 타이머 시간만큼 빼기
+$target_total_minutes = ($target_hour * 60) + $target_minute;
+$start_total_minutes = $target_total_minutes - ceil($total_timer_seconds / 60);
+
+// 음수가 되면 전날로 넘어가므로 보정
+if ($start_total_minutes < 0) {
+    $start_total_minutes += 24 * 60; // 24시간 추가
+}
+
+$auto_start_hour = floor($start_total_minutes / 60);
+$auto_start_minute = $start_total_minutes % 60;
+
+// 계산된 자동 시작시간 적용
+$settings['auto_start_hour'] = $auto_start_hour;
+$settings['auto_start_minute'] = $auto_start_minute;
 
 // 설정 페이지에서는 음악 설정을 항상 빈 값으로 시작 (랜덤 선택을 위해)
 $settings['online_music'] = '';
@@ -61,8 +100,13 @@ $settings['online_music'] = '';
                            <textarea id="title" name="title" placeholder="타이머 제목을 입력하세요" rows="3"><?= htmlspecialchars($settings['title']) ?></textarea>
                        </div>
                 
+                <div class="input-group">
+                    <label for="end_message">종료 메시지 :</label>
+                    <input type="text" id="end_message" name="end_message" value="<?= htmlspecialchars($settings['end_message']) ?>" placeholder="타이머 완료 메시지">
+                </div>
+                
                         <div class="input-group">
-                            <label for="time">시간 :</label>
+                            <label for="time">타이머 :</label>
                             <div class="time-select-container">
                                 <select id="minutes" name="minutes">
                                     <?php
@@ -86,8 +130,30 @@ $settings['online_music'] = '';
                         </div>
                 
                 <div class="input-group">
-                    <label for="end_message">종료 메시지 :</label>
-                    <input type="text" id="end_message" name="end_message" value="<?= htmlspecialchars($settings['end_message']) ?>" placeholder="타이머 완료 메시지">
+                    <label for="auto_start">자동 시작시간 :</label>
+                    <div class="auto-start-container">
+                        <select id="auto_start_hour" name="auto_start_hour" style="display: inline-block; width: auto; margin-right: 10px;">
+                            <?php 
+                            $selected_hour = isset($settings['auto_start_hour']) ? $settings['auto_start_hour'] : -1; 
+                            ?>
+                            <option value="-1" <?= ($selected_hour == -1) ? 'selected' : '' ?>>사용 안함</option>
+                            <?php
+                            for ($h = 0; $h <= 23; $h++) {
+                                $selected = ($selected_hour == $h) ? 'selected' : '';
+                                echo "<option value=\"$h\" $selected>{$h}시</option>";
+                            }
+                            ?>
+                        </select>
+                        <select id="auto_start_minute" name="auto_start_minute" style="display: inline-block; width: auto;">
+                            <?php
+                            $selected_minute = isset($settings['auto_start_minute']) ? $settings['auto_start_minute'] : 0;
+                            for ($m = 0; $m <= 59; $m++) {
+                                $selected = ($selected_minute == $m) ? 'selected' : '';
+                                echo "<option value=\"$m\" $selected>{$m}분</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
                 </div>
                 
                        <div class="input-group">
@@ -116,10 +182,23 @@ $settings['online_music'] = '';
                 <button type="submit" name="start_timer" class="start-button">타이머 시작</button>
             </form>
             
-                   <div class="fullscreen-notice">
-                       💡 "타이머 시작" 버튼을 클릭하거나 <kbd>스페이스바</kbd>를 눌러 타이머를 시작하세요.
-                       <br>타이머 페이지에서 <kbd>스페이스바</kbd>를 눌러 전체화면으로 전환할 수 있습니다.
-                   </div>
+            <div class="info-section">
+                <div class="info-row">
+                    <div class="info-box left">
+                        <h4>자동 시작시간 설정</h4>
+                        <p>일요일은 13시, 평일은 19시 30분에 타이머가 시작되도록 시간을 자동 계산합니다. (3분 타이머라면 일요일 12시 57분, 평일 19시 27분 으로 자동 시작시간이 먼저 선택되어 있습니다.)</p>
+                    </div>
+                    
+                    <div class="info-box right">
+                        <h4>자동 시작 작동 방식</h4>
+                        <p>대기 화면에서 현재 시간을 확인하여 설정된 시간이 되면 자동으로 타이머를 시작합니다.(대기 화면은 스페이스바로 전체화면으로 먼저 설정해 두세요)</p>
+                    </div>
+                </div>
+                
+                <div class="fullscreen-notice">
+                    💡 <kbd>스페이스바</kbd> 또는 "타이머 시작" 버튼으로 시작하세요
+                </div>
+            </div>
                    
         </div>
     </div>

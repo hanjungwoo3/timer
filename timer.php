@@ -361,6 +361,7 @@ if (!$settings) {
         
         // 현재 시간 표시 관련 변수
         let currentTimeInterval = null;
+        let autoStartInterval = null;
         
         // 현재 시간 표시 요소 생성
         function createCurrentTimeDisplay() {
@@ -368,6 +369,12 @@ if (!$settings) {
             const existingTimeDisplay = document.getElementById('currentTimeDisplay');
             if (existingTimeDisplay) {
                 existingTimeDisplay.remove();
+            }
+            
+            // 기존 타이머 시작시간 요소가 있으면 제거
+            const existingStartTimeDisplay = document.getElementById('startTimeDisplay');
+            if (existingStartTimeDisplay) {
+                existingStartTimeDisplay.remove();
             }
             
             // 현재 시간 표시 요소 생성
@@ -386,11 +393,35 @@ if (!$settings) {
                 font-family: 'Courier New', monospace;
             `;
             
+            // 타이머 시작시간 표시 요소 생성
+            const startTimeDisplay = document.createElement('div');
+            startTimeDisplay.id = 'startTimeDisplay';
+            startTimeDisplay.style.cssText = `
+                position: fixed;
+                top: 75vh;
+                left: 50%;
+                transform: translateX(-50%);
+                color: #2a2a2a;
+                font-size: clamp(10px, 1.4vw, 18px);
+                font-weight: normal;
+                text-align: center;
+                z-index: 999;
+                font-family: 'Courier New', monospace;
+            `;
+            
             document.body.appendChild(currentTimeDisplay);
+            document.body.appendChild(startTimeDisplay);
+            
+            // 타이머 시작시간 표시
+            updateStartTimeDisplay();
             
             // 현재 시간 업데이트 시작
             updateCurrentTime();
             currentTimeInterval = setInterval(updateCurrentTime, 1000);
+            
+            // 자동 시작 시간 체크 시작
+            checkAutoStart();
+            autoStartInterval = setInterval(checkAutoStart, 1000);
         }
         
         // 현재 시간 업데이트
@@ -405,6 +436,23 @@ if (!$settings) {
             }
         }
         
+        // 타이머 시작시간 표시 업데이트
+        function updateStartTimeDisplay() {
+            const startTimeDisplay = document.getElementById('startTimeDisplay');
+            if (startTimeDisplay) {
+                const autoStartHour = <?= isset($settings['auto_start_hour']) ? $settings['auto_start_hour'] : -1 ?>;
+                const autoStartMinute = <?= isset($settings['auto_start_minute']) ? $settings['auto_start_minute'] : 0 ?>;
+                
+                if (autoStartHour === -1) {
+                    startTimeDisplay.textContent = '(자동 시작 사용 안함)';
+                } else {
+                    const hourStr = String(autoStartHour).padStart(2, '0');
+                    const minuteStr = String(autoStartMinute).padStart(2, '0');
+                    startTimeDisplay.textContent = `(타이머 시작시간: ${hourStr}:${minuteStr})`;
+                }
+            }
+        }
+        
         // 현재 시간 표시 제거
         function removeCurrentTimeDisplay() {
             const currentTimeDisplay = document.getElementById('currentTimeDisplay');
@@ -412,9 +460,61 @@ if (!$settings) {
                 currentTimeDisplay.remove();
             }
             
+            const startTimeDisplay = document.getElementById('startTimeDisplay');
+            if (startTimeDisplay) {
+                startTimeDisplay.remove();
+            }
+            
             if (currentTimeInterval) {
                 clearInterval(currentTimeInterval);
                 currentTimeInterval = null;
+            }
+            
+            if (autoStartInterval) {
+                clearInterval(autoStartInterval);
+                autoStartInterval = null;
+            }
+        }
+        
+        // 자동 시작 시간 체크
+        function checkAutoStart() {
+            const autoStartHour = <?= isset($settings['auto_start_hour']) ? $settings['auto_start_hour'] : -1 ?>;
+            const autoStartMinute = <?= isset($settings['auto_start_minute']) ? $settings['auto_start_minute'] : 0 ?>;
+            
+            // 자동 시작이 비활성화된 경우
+            if (autoStartHour === -1) {
+                return;
+            }
+            
+            // 준비 상태가 아닌 경우 체크하지 않음
+            if (!isReady) {
+                return;
+            }
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentSecond = now.getSeconds();
+            
+            // 설정된 시간과 일치하고 0초인 경우 자동 시작
+            if (currentHour === autoStartHour && currentMinute === autoStartMinute && currentSecond === 0) {
+                console.log(`자동 시작: ${autoStartHour}시 ${autoStartMinute}분`);
+                
+                // 전체화면이 아니면 먼저 전체화면으로 전환
+                if (!isFullscreenReady) {
+                    toggleFullscreen();
+                    isFullscreenReady = true;
+                    
+                    // 전체화면 전환 후 잠시 대기 후 타이머 시작
+                    setTimeout(() => {
+                        if (isReady && isFullscreenReady) {
+                            startTimerFromReady();
+                        }
+                    }, 500);
+                } else {
+                    // 이미 전체화면이면 바로 타이머 시작
+                    startTimerFromReady();
+                }
             }
         }
         

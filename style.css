@@ -49,7 +49,7 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-bottom: 8px; /* 더 줄임 */
+    margin-bottom: 6px; /* 더 컴팩트하게 */
 }
 
 .input-group label {
@@ -154,17 +154,51 @@ body {
     box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
 }
 
+/* 정보 섹션 스타일 */
+.info-section {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-row {
+    display: flex;
+    gap: 12px;
+}
+
+.info-box {
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #ffffff;
+    flex: 1;
+}
+
+.info-box h4 {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+    font-weight: bold;
+    color: #00ffff;
+}
+
+.info-box p {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #cccccc;
+}
+
 /* 전체화면 안내 메시지 */
 .fullscreen-notice {
-    margin-top: 8px;
-    padding: 10px 12px; /* 패딩 줄임 */
+    padding: 8px 10px;
     background-color: rgba(52, 152, 219, 0.1);
     border: 1px solid rgba(52, 152, 219, 0.3);
-    border-radius: 8px;
+    border-radius: 6px;
     color: #3498db;
-    font-size: 14px;
+    font-size: 12px;
     text-align: center;
-    line-height: 1.4;
 }
 
 /* HTML 태그 안내 메시지 */
@@ -416,6 +450,11 @@ kbd {
     .input-group {
         flex-direction: column;
         align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .info-row {
+        flex-direction: column;
         gap: 8px;
     }
     
