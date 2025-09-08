@@ -314,7 +314,7 @@ if (!$settings) {
                         showMessage();
                         
                         // 새로운 타이머 시작
-                        messageInterval = setInterval(showNextMessage, 7000);
+                        messageInterval = setInterval(showNextMessage, 10000);
                         console.log('새로운 타이머 시작됨');
                     }, 10000); // 10초 휴식
                     return;
@@ -356,7 +356,7 @@ if (!$settings) {
                 }, 2000); // fade out 시간 (조금 더 빠르게)
             }
             
-            // 5초 후에 첫 번째 메시지 표시
+            // 10초 후에 첫 번째 메시지 표시
             setTimeout(() => {
                 console.log('첫 번째 메시지 표시 시작');
                 messageLine.textContent = GUIDE_MESSAGES[currentMessageIndex];
@@ -364,9 +364,9 @@ if (!$settings) {
                 console.log('첫 번째 메시지:', GUIDE_MESSAGES[currentMessageIndex]);
                 currentMessageIndex = 1; // 다음은 두 번째 메시지
                 
-                // 7초마다 메시지 변경 (조금 더 빠르게)
-                messageInterval = setInterval(showNextMessage, 7000);
-            }, 5000); // 5초 지연
+                // 10초마다 메시지 변경
+                messageInterval = setInterval(showNextMessage, 10000);
+            }, 10000); // 10초 지연
             
             console.log('안내 메시지 순환 시작:', GUIDE_MESSAGES);
         }
