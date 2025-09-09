@@ -5,15 +5,18 @@ PHP 기반의 강력한 웹 타이머 애플리케이션입니다. 원형 진행
 ## 📸 스크린샷
 
 ### 설정 화면
-![설정 화면](screenshot/setting.png)
+<img src="screenshot/setting.png" alt="설정 화면" width="400">
+
 *타이머 제목, 시간, 안내 메시지, 배경 음악 등을 설정하는 메인 화면*
 
 ### 대기 화면  
-![대기 화면](screenshot/wait.png)
+<img src="screenshot/wait.png" alt="대기 화면" width="400">
+
 *설정된 자동 시작 시간까지 대기하는 화면*
 
 ### 타이머 실행 화면
-![타이머 화면](screenshot/timer.png)
+<img src="screenshot/timer.png" alt="타이머 화면" width="400">
+
 *원형 진행바와 함께 타이머가 실행되는 화면*
 
 ## 🚀 주요 기능
