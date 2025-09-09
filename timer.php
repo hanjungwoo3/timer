@@ -229,10 +229,10 @@ if (!$settings) {
             
             // 마지막 1분일 때 색상 변경
             if (remainingSeconds <= 60 && remainingSeconds > 0) {
-                progressRing.style.stroke = '#202020'; // 진행바 매우 매우 어두운 회색
+                progressRing.style.stroke = '#0a0a0a'; // 진행된 부분 거의 검은색
                 timerDisplay.style.color = '#404040'; // 타이머 숫자는 그대로 유지
             } else {
-                progressRing.style.stroke = '#202020'; // 진행바 1분 남았을 때와 동일한 색상
+                progressRing.style.stroke = '#0a0a0a'; // 진행된 부분 거의 검은색
                 timerDisplay.style.color = '#404040'; // 타이머 숫자도 어두운 회색
             }
         }
@@ -502,12 +502,13 @@ if (!$settings) {
                 top: 70vh;
                 left: 50%;
                 transform: translateX(-50%);
-                color: #2a2a2a;
+                color: #1a1a1a;
                 font-size: clamp(12px, 1.5vw, 18px);
                 font-weight: normal;
                 text-align: left;
                 z-index: 999;
                 font-family: 'Courier New', monospace;
+                opacity: 0.7;
             `;
             
             // 전체화면 안내 메시지 요소 생성
@@ -624,7 +625,7 @@ if (!$settings) {
                     }
                     remainingTimeStr += `${remainingSeconds}초`;
                     
-                    timeDisplayHTML += `<span style="opacity: 0.7;">${remainingTimeStr}</span>`;
+                    timeDisplayHTML += remainingTimeStr;
                 }
                 
                 startTimeDisplay.innerHTML = timeDisplayHTML;

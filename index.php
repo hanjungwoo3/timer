@@ -97,12 +97,12 @@ $settings['online_music'] = '';
             <form method="POST" class="setup-form">
                        <div class="input-group">
                            <label for="title">제목 :</label>
-                           <textarea id="title" name="title" placeholder="타이머 제목을 입력하세요" rows="3"><?= htmlspecialchars($settings['title']) ?></textarea>
+                           <textarea id="title" name="title" placeholder="타이머 제목을 입력하세요" rows="2"><?= htmlspecialchars($settings['title']) ?></textarea>
                        </div>
                 
                 <div class="input-group">
                     <label for="end_message">안내 메시지 :</label>
-                    <textarea id="end_message" name="end_message" rows="4" placeholder="타이머 진행 중 안내 메시지 (줄바꿈으로 여러 줄 입력 가능)"><?= htmlspecialchars($settings['end_message']) ?></textarea>
+                    <textarea id="end_message" name="end_message" rows="3" placeholder="타이머 진행 중 안내 메시지 (줄바꿈으로 여러 줄 입력 가능)"><?= htmlspecialchars($settings['end_message']) ?></textarea>
                 </div>
                 
                         <div class="input-group">
