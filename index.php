@@ -191,7 +191,7 @@ $settings['online_music'] = '';
                     
                     <div class="info-box right">
                         <h4>자동 시작 작동 방식</h4>
-                    <p>먼저 <strong style="color: #3498db;">타이머 시작</strong> 버튼을 누른 후 <strong style="color: #3498db;">대기 화면</strong>에서 시작시간이 되면 타이머가 작동합니다.</p>
+                    <p>먼저 <strong style="color: #3498db;">타이머 시작</strong> 버튼을 누른 후 <strong style="color: #3498db;">대기 화면</strong>에서 시작시간이 되면 타이머가 작동합니다. (수동 시작은 스페이스바)</p>
                     </div>
                 </div>
                 
