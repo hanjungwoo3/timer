@@ -487,34 +487,25 @@ if (!$settings) {
                 existingStartTimeDisplay.remove();
             }
             
-            // 현재 시간 표시 요소 생성
+            // 현재 시간 표시 요소 생성 (통합된 블록에서 처리하므로 숨김)
             const currentTimeDisplay = document.createElement('div');
             currentTimeDisplay.id = 'currentTimeDisplay';
             currentTimeDisplay.style.cssText = `
+                display: none;
+            `;
+            
+            // 통합된 시간 표시 블록 생성
+            const startTimeDisplay = document.createElement('div');
+            startTimeDisplay.id = 'startTimeDisplay';
+            startTimeDisplay.style.cssText = `
                 position: fixed;
                 top: 70vh;
                 left: 50%;
                 transform: translateX(-50%);
                 color: #2a2a2a;
-                font-size: clamp(12px, 1.8vw, 24px);
+                font-size: clamp(12px, 1.5vw, 18px);
                 font-weight: normal;
-                text-align: center;
-                z-index: 999;
-                font-family: 'Courier New', monospace;
-            `;
-            
-            // 타이머 시작시간 표시 요소 생성
-            const startTimeDisplay = document.createElement('div');
-            startTimeDisplay.id = 'startTimeDisplay';
-            startTimeDisplay.style.cssText = `
-                position: fixed;
-                top: 75vh;
-                left: 50%;
-                transform: translateX(-50%);
-                color: #2a2a2a;
-                font-size: clamp(10px, 1.4vw, 18px);
-                font-weight: normal;
-                text-align: center;
+                text-align: left;
                 z-index: 999;
                 font-family: 'Courier New', monospace;
             `;
@@ -580,36 +571,34 @@ if (!$settings) {
             setInterval(updateFullscreenNotice, 1000);
         }
         
-        // 현재 시간 업데이트
+        // 현재 시간 업데이트 (통합된 시간 블록에서 처리)
         function updateCurrentTime() {
-            const currentTimeDisplay = document.getElementById('currentTimeDisplay');
-            if (currentTimeDisplay) {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                currentTimeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
-            }
-            
-            // 타이머 시작시간도 함께 업데이트 (남은 시간 실시간 계산)
+            // 통합된 시간 표시 업데이트
             updateStartTimeDisplay();
         }
         
-        // 타이머 시작시간 표시 업데이트
+        // 통합된 시간 표시 업데이트
         function updateStartTimeDisplay() {
             const startTimeDisplay = document.getElementById('startTimeDisplay');
             if (startTimeDisplay) {
+                // 현재 시간 가져오기
+                const now = new Date();
+                const currentHours = String(now.getHours()).padStart(2, '0');
+                const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+                const currentSeconds = String(now.getSeconds()).padStart(2, '0');
+                
                 const autoStartHour = <?= isset($settings['auto_start_hour']) ? $settings['auto_start_hour'] : -1 ?>;
                 const autoStartMinute = <?= isset($settings['auto_start_minute']) ? $settings['auto_start_minute'] : 0 ?>;
                 
+                let timeDisplayHTML = `현재시간: ${currentHours}시 ${currentMinutes}분 ${currentSeconds}초<br>`;
+                
                 if (autoStartHour === -1) {
-                    startTimeDisplay.textContent = '자동 시작 사용 안함';
+                    timeDisplayHTML += '자동 시작 사용 안함';
                 } else {
                     const hourStr = String(autoStartHour).padStart(2, '0');
                     const minuteStr = String(autoStartMinute).padStart(2, '0');
                     
-                    // 현재 시간과 시작 시간의 차이 계산
-                    const now = new Date();
+                    // 시작 시간 계산
                     const startTime = new Date();
                     startTime.setHours(autoStartHour, autoStartMinute, 0, 0);
                     
@@ -623,12 +612,22 @@ if (!$settings) {
                     const remainingMinutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
                     const remainingSeconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
                     
-                    const remainingHourStr = String(remainingHours).padStart(2, '0');
-                    const remainingMinuteStr = String(remainingMinutes).padStart(2, '0');
-                    const remainingSecondStr = String(remainingSeconds).padStart(2, '0');
+                    timeDisplayHTML += `시작시간: ${hourStr}시 ${minuteStr}분<br>`;
                     
-                    startTimeDisplay.innerHTML = `타이머 시작시간: ${hourStr}:${minuteStr}<br><span style="font-size: 0.8em; opacity: 0.7;">(${remainingHourStr}:${remainingMinuteStr}:${remainingSecondStr} 후에 자동 시작됩니다.)</span>`;
+                    // 남은 시간 표시 (0인 단위는 생략)
+                    let remainingTimeStr = '남은시간: ';
+                    if (remainingHours > 0) {
+                        remainingTimeStr += `${remainingHours}시간 `;
+                    }
+                    if (remainingMinutes > 0) {
+                        remainingTimeStr += `${remainingMinutes}분 `;
+                    }
+                    remainingTimeStr += `${remainingSeconds}초`;
+                    
+                    timeDisplayHTML += `<span style="opacity: 0.7;">${remainingTimeStr}</span>`;
                 }
+                
+                startTimeDisplay.innerHTML = timeDisplayHTML;
             }
         }
         
@@ -1032,18 +1031,9 @@ if (!$settings) {
             }
         }
         
-        // 전체화면 상태 변화 감지
+        // 전체화면 상태 변화 감지 (버튼이 없으므로 빈 함수)
         function updateFullscreenButton() {
-            if (document.fullscreenElement || 
-                document.webkitFullscreenElement || 
-                document.mozFullScreenElement || 
-                document.msFullscreenElement) {
-                fullscreenBtn.innerHTML = '⛶';
-                fullscreenBtn.title = '전체화면 해제 (F11)';
-            } else {
-                fullscreenBtn.innerHTML = '⛶';
-                fullscreenBtn.title = '전체화면 (F11)';
-            }
+            // 전체화면 버튼이 삭제되어 더 이상 업데이트할 필요 없음
         }
         
         // 전체화면 상태 변화 이벤트 리스너
