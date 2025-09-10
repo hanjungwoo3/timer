@@ -499,16 +499,16 @@ if (!$settings) {
             startTimeDisplay.id = 'startTimeDisplay';
             startTimeDisplay.style.cssText = `
                 position: fixed;
-                top: 70vh;
-                left: 50%;
-                transform: translateX(-50%);
-                color: #1a1a1a;
+                bottom: 20px;
+                left: 20px;
+                transform: none;
+                color: #666666;
                 font-size: clamp(12px, 1.5vw, 18px);
                 font-weight: normal;
                 text-align: left;
                 z-index: 999;
                 font-family: 'Courier New', monospace;
-                opacity: 0.7;
+                opacity: 1;
             `;
             
             // 전체화면 안내 메시지 요소 생성
@@ -794,7 +794,7 @@ if (!$settings) {
             // 제목만 표시 (큰 크기로 표시)
             const timerTitle = document.querySelector('.timer-title');
             timerTitle.style.display = 'block';
-            timerTitle.style.fontSize = 'clamp(20px, 4.5vw, 54px)'; // 더 줄인 크기로 설정
+            timerTitle.style.fontSize = 'clamp(40px, 9vw, 108px)'; // 2배 크기로 설정
             timerTitle.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
             
             // 제목 클릭 이벤트 리스너 추가 (스페이스키와 동일한 기능)

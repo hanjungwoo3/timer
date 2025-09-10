@@ -97,7 +97,7 @@ $settings['online_music'] = '';
             <form method="POST" class="setup-form">
                        <div class="input-group">
                            <label for="title">제목 :</label>
-                           <textarea id="title" name="title" placeholder="타이머 제목을 입력하세요" rows="2"><?= htmlspecialchars($settings['title']) ?></textarea>
+                           <textarea id="title" name="title" placeholder="타이머 제목을 입력하세요" rows="3"><?= htmlspecialchars($settings['title']) ?></textarea>
                        </div>
                 
                 <div class="input-group">

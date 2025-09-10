@@ -283,7 +283,7 @@ kbd {
     background-repeat: no-repeat;
     background-position: calc(100% - 100px) calc(100% - 100px);
     background-size: 150px;
-    opacity: 0.3; /* 투명도 30% */
+    opacity: 0.7; /* 투명도 70% */
     pointer-events: none; /* 클릭 이벤트 차단 */
     z-index: -1; /* 다른 요소들 뒤로 */
 }
@@ -299,23 +299,26 @@ kbd {
 }
 
 .timer-title {
-    font-size: clamp(20px, 4.5vw, 54px); /* 폰트 크기를 더 줄임 */
+    font-size: clamp(40px, 9vw, 108px); /* 폰트 크기를 2배로 증가 */
     font-weight: bold;
     color: #ffffff;
     text-align: center; /* 가운데 정렬 */
     margin-bottom: 20px;
-    width: 90vw; /* 뷰포트 기준 너비로 고정 */
-    max-width: 800px; /* 최대 너비 제한 */
+    width: 100%; /* 전체 너비 사용 */
+    max-width: none; /* 최대 너비 제한 제거 */
     box-sizing: border-box; /* 패딩/마진 포함한 크기 계산 */
-    white-space: normal; /* 일반적인 인라인 줄바꿈 처리 */
+    white-space: nowrap; /* 줄바꿈 방지 */
     overflow: visible; /* 넘치는 텍스트 표시 */
-    word-wrap: break-word; /* 긴 단어 줄바꿈 */
+    word-wrap: normal; /* 줄바꿈 방지 */
+    text-overflow: ellipsis; /* 넘치는 텍스트는 ... 처리 */
     padding: 10px 20px; /* 좌우 패딩 추가로 여유 공간 확보 */
     background-color: transparent; /* 디버깅 배경 제거 */
     display: block; /* 블록 요소로 명시적 설정 */
-    position: relative; /* 상대 위치로 안정성 확보 */
-    margin-left: auto;
-    margin-right: auto; /* 중앙 정렬 */
+    position: fixed; /* 고정 위치로 변경 */
+    top: 50%; /* 화면 가운데 */
+    left: 50%;
+    transform: translate(-50%, -50%); /* 정확한 중앙 정렬 */
+    margin: 0; /* 마진 제거 */
 }
 
 /* 원형 진행바 컨테이너 */
@@ -336,9 +339,7 @@ kbd {
 }
 
 .progress-ring {
-    transform: rotate(-90deg); /* 12시 방향에서 시작하도록 회전 */
-    width: 100%;
-    height: 100%;
+    display: none !important; /* 진행바 SVG만 숨김 */
 }
 
 .progress-ring-background {
@@ -367,11 +368,11 @@ kbd {
 
 /* 타이머 디스플레이 */
 .timer-display {
-    position: absolute;
-    top: 45%; /* 음악 정보를 위해 약간 위로 이동 */
+    position: fixed;
+    bottom: 120px; /* 안내 메시지(40px) 위에 배치 */
     left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: clamp(36px, 7vw, 72px); /* 타이머 폰트 크기 조금 증가 */
+    transform: translateX(-50%);
+    font-size: clamp(72px, 14vw, 144px); /* 타이머 폰트 크기 2배로 증가 */
     font-weight: bold;
     color: #ffffff;
     font-family: 'Courier New', monospace;
@@ -385,21 +386,7 @@ kbd {
 
 /* 음악 정보 디스플레이 */
 .music-info {
-    position: absolute;
-    top: 60%; /* 타이머 아래 위치 */
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: clamp(10px, 2vw, 14px);
-    font-weight: normal;
-    color: #888888; /* 회색 */
-    font-family: 'Arial', sans-serif;
-    text-align: center;
-    z-index: 10;
-    pointer-events: none;
-    max-width: 80%; /* 타이머보다 약간 넓게 */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* 긴 텍스트는 ... 으로 표시 */
+    display: none !important; /* 음악 정보 완전히 숨김 */
 }
 
 /* 타이머 컨트롤 */
@@ -432,7 +419,7 @@ kbd {
 
 /* 안내 메시지 */
 .guide-message {
-    font-size: clamp(16px, 3vw, 24px);
+    font-size: clamp(32px, 6vw, 48px);
     font-weight: normal;
     color: #888888;
     text-align: center;
@@ -729,7 +716,7 @@ select option {
     margin: 0;
     padding: 15px 20px;
     color: #ffffff;
-    font-size: clamp(16px, 3vw, 24px);
+    font-size: clamp(32px, 6vw, 48px);
     font-weight: normal;
     text-align: center;
     z-index: 1000;
