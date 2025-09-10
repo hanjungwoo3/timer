@@ -739,7 +739,7 @@ select option {
 /* 안내 메시지 스타일 */
 .guide-message {
     position: fixed;
-    bottom: 40px;
+    bottom: 20px; /* 40px에서 20px로 조금 아래로 */
     left: 0;
     right: 0;
     width: 100vw;
