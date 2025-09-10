@@ -43,8 +43,16 @@ if (!$settings) {
                 <g class="progress-ring-ticks"></g>
             </svg>
                            <div class="timer-display" id="timerDisplay">
-                               <?= sprintf('%02d:%02d', $settings['minutes'], isset($settings['seconds']) ? $settings['seconds'] : 0) ?>
+                               <div class="timer-number">
+                                   <?= sprintf('%02d:%02d', $settings['minutes'], isset($settings['seconds']) ? $settings['seconds'] : 0) ?>
+                               </div>
+                               
+                               <!-- 가로줄 진행바 -->
+                               <div class="horizontal-progress-container">
+                                   <div class="horizontal-progress-bar" id="horizontalProgressBar"></div>
+                               </div>
                            </div>
+                           
                     <div class="music-info" id="musicInfo"></div>
                 </div>
             </div>
@@ -157,6 +165,7 @@ if (!$settings) {
         
         // DOM 요소
         const timerDisplay = document.getElementById('timerDisplay');
+        const timerNumber = document.querySelector('.timer-number');
         const guideMessage = document.getElementById('guideMessage');
         const progressRing = document.querySelector('.progress-ring-circle');
         
@@ -221,11 +230,18 @@ if (!$settings) {
             // 남은 시간을 기준으로 정확한 퍼센트 계산
             const exactPercent = (remainingSeconds / totalSeconds) * 100;
             
-            // 틱과 동일한 방식으로 계산
+            // 원형 진행바 업데이트
             // exactPercent가 100%일 때 offset = circumference (완전한 원)
             // exactPercent가 0%일 때 offset = 0 (원이 사라짐)
             const offset = circumference * (exactPercent / 100);
             progressRing.style.strokeDashoffset = offset;
+            
+            // 가로줄 진행바 업데이트 (진행된 정도로 표시)
+            const horizontalProgressBar = document.getElementById('horizontalProgressBar');
+            if (horizontalProgressBar) {
+                const progressedPercent = 100 - exactPercent; // 진행된 정도 (남은 시간의 반대)
+                horizontalProgressBar.style.width = progressedPercent + '%';
+            }
             
             // 마지막 1분일 때 색상 변경
             if (remainingSeconds <= 60 && remainingSeconds > 0) {
@@ -241,7 +257,9 @@ if (!$settings) {
         function updateDisplay() {
             const minutes = Math.floor(remainingSeconds / 60);
             const seconds = remainingSeconds % 60;
-            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (timerNumber) {
+                timerNumber.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
             
             // 진행률 계산 및 업데이트
             const progress = (remainingSeconds / TOTAL_SECONDS) * 100;

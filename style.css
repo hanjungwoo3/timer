@@ -281,7 +281,7 @@ kbd {
     height: 100%;
     background-image: url('screenshot/jw.png');
     background-repeat: no-repeat;
-    background-position: calc(100% - 100px) calc(100% - 100px);
+    background-position: calc(100% - 70px) calc(100% - 70px);
     background-size: 150px;
     opacity: 0.7; /* 투명도 70% */
     pointer-events: none; /* 클릭 이벤트 차단 */
@@ -368,20 +368,51 @@ kbd {
 
 /* 타이머 디스플레이 */
 .timer-display {
-    position: fixed;
-    bottom: 120px; /* 안내 메시지(40px) 위에 배치 */
-    left: 50%;
-    transform: translateX(-50%);
+    position: fixed !important;
+    bottom: 120px !important; /* 안내 메시지 위에 배치 */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center;
+    z-index: 10;
+    pointer-events: none; /* 클릭 이벤트 방지 */
+    max-width: 70%; /* 원의 70% 너비로 제한 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 타이머 숫자 */
+.timer-number {
     font-size: clamp(72px, 14vw, 144px); /* 타이머 폰트 크기 2배로 증가 */
     font-weight: bold;
     color: #ffffff;
     font-family: 'Courier New', monospace;
-    text-align: center;
-    transition: all 0.2s ease;
-    z-index: 10;
-    pointer-events: none; /* 클릭 이벤트 방지 */
-    max-width: 70%; /* 원의 70% 너비로 제한 */
     white-space: nowrap; /* 줄바꿈 방지 */
+    transition: all 0.2s ease;
+}
+
+/* 가로줄 진행바 컨테이너 */
+.horizontal-progress-container {
+    position: relative;
+    margin-top: 0; /* 타이머 숫자에 바로 붙이기 */
+    width: 100%; /* 타이머 정도 넓이로 */
+    height: 8px; /* 두께 2배로 */
+    background-color: #333333;
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 10;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 가로줄 진행바 */
+.horizontal-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: #e0e0e0; /* 흰색보다 조금 어둡게 */
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+    box-shadow: 0 0 5px rgba(224, 224, 224, 0.3);
 }
 
 /* 음악 정보 디스플레이 */
